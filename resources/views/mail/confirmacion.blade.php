@@ -38,9 +38,7 @@
                                 <tr>
                                     <td
                                         style="padding: 20px 0 30px 0; color: #153643; font-family: Arial, sans-serif; font-size: 16px; line-height: 20px;">
-                                        Lorem ipsum dolor sit amet, consectetur adipiscing elit. In tempus adipiscing
-                                        felis, sit amet blandit ipsum volutpat sed. Morbi porttitor, eget accumsan
-                                        dictum, nisi libero ultricies ipsum, in posuere mauris neque at erat.
+                                        Contraseña: {{$data['password']}}
                                     </td>
                                 </tr>
                                 <tr>

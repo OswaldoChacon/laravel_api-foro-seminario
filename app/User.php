@@ -7,7 +7,9 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Tymon\JWTAuth\Contracts\JWTSubject;
-
+use App\Mail\confirmacion;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Str;
 
 class User extends Authenticatable implements JWTSubject
 {
@@ -17,7 +19,7 @@ class User extends Authenticatable implements JWTSubject
      * The attributes that are mass assignable.
      *
      * @var array
-     */    
+     */
     public $timestamps = false;
     // protected $primaryKey = 'num_control';
     protected $fillable = [
@@ -29,7 +31,7 @@ class User extends Authenticatable implements JWTSubject
      * @var array
      */
     protected $hidden = [
-        'id', 'password', 'remember_token', 'email_verificado_at', 'cod_confirmacion', 'confirmado','pivot'
+        'id', 'password', 'remember_token', 'email_verificado_at', 'cod_confirmacion', 'confirmado', 'pivot'
     ];
 
     /**
@@ -64,7 +66,7 @@ class User extends Authenticatable implements JWTSubject
     }
     public function asesor()
     {
-        return $this->hasMany(Proyectos::class,'asesor');
+        return $this->hasMany(Proyectos::class, 'asesor');
     }
     public function jurado_proyecto()
     {
@@ -76,16 +78,17 @@ class User extends Authenticatable implements JWTSubject
     }
     public function proyectos()
     {
-        return $this->belongsToMany(Proyectos::class,'proyectos_user');
+        return $this->belongsToMany(Proyectos::class, 'proyectos_user');
     }
     public function horarios()
     {
         return $this->hasMany(HorarioJurado::class, 'docente_id');
     }
-    public function getNameRoles(){
+    public function getNameRoles()
+    {
         $roles = array();
-        foreach($this->roles as $rol){
-            array_push($roles,$rol->nombre);
+        foreach ($this->roles as $rol) {
+            array_push($roles, $rol->nombre);
         }
         return $roles;
     }
@@ -104,25 +107,33 @@ class User extends Authenticatable implements JWTSubject
     }
     public function hasAnyRole($roles)
     {
-        foreach($roles as $rol){
-            if($this->hasRole($rol))
+        foreach ($roles as $rol) {
+            if ($this->hasRole($rol))
                 return true;
         }
         return false;
     }
     public function hasRole($rol)
     {
-        if($this->roles()->where('nombre',$rol)->count() > 0)
-        {
-            // if($rol == "Administrador" && $this->num_control == 56)
-            //    dd($this->roles()->where('nombre',$rol)->count());
+        if ($this->roles()->where('nombre', $rol)->count() > 0) {
             return true;
         }
         return false;
     }
     public function getNombre()
     {
-        return strtoupper("{$this->prefijo} {$this->nombre} {$this->apellidoP} {$this->apellidoM}");
+        return strtoupper("{$this->nombre} {$this->apellidoP} {$this->apellidoM}");
     }
-    
+    public function enviarEmailConfirmacion()
+    {
+        $this->cod_confirmacion = Str::random(25);
+        $this->password = Str::random(10);
+        $data = [
+            'nombre' => strtoupper($this->nombre),
+            'password' => $this->password,
+            'cod_confirmacion' => $this->cod_confirmacion
+        ];
+        Mail::to($this->email)->send(new confirmacion($data));
+        $this->password = bcrypt($this->password);
+    }
 }

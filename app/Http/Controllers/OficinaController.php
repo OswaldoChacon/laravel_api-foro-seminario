@@ -10,7 +10,6 @@ use App\Http\Requests\Tipos\EditarTiposRequest;
 use App\Http\Requests\Tipos\RegistrarTiposRequest;
 use App\Http\Requests\Usuario\EditarUsuarioRequest;
 use App\Http\Requests\Usuario\RegistrarUsuarioRequest;
-use App\Mail\confirmacion;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use App\User;
@@ -18,11 +17,10 @@ use App\Roles;
 use App\Foros;
 use App\Proyectos;
 use App\Http\Requests\Foro\ConfigForoRequest;
-
 use App\Http\Requests\Foro\EditarForoRequest;
 use App\LineasDeInvestigacion;
 use App\TiposProyectos;
-use Illuminate\Support\Facades\Mail;
+
 
 
 use Exception;
@@ -35,58 +33,98 @@ class OficinaController extends Controller
     {
         // $this->middleware('jwtAuth');
     }
+
+    public function roles(Request $request)
+    {
+        $roles = Roles::all();
+        return response()->json($roles, 200);
+    }
+    public function agregar_rol(Request $request)
+    {
+        $rol = new Roles();
+        $rol->fill($request->all());
+        $rol->save();
+        return response()->json(['message' => 'Rol agregado'], 200);
+    }
+    public function actualizar_rol(Request $request, $rol)
+    {
+        $rol = Roles::where('nombre', $rol)->firstOrFail();
+        $rol->nombre = $request->nombre;
+        $rol->save();
+        return response()->json(['message' => 'Rol actualizado'], 200);
+    }
+    public function eliminar_rol($rol)
+    {
+        $rol = Roles::where('nombre', $rol)->firstOrFail();
+        $rol->delete();
+        return response()->json(['message' => 'Rol eliminado'], 200);
+    }
+
+    public function usuarios(Request $request)
+    {
+        $usersTable = User::query();
+        if ($request->rol !== 'Todos')
+            $usersTable->whereHas('roles', function ($query) use ($request) {
+                $query->where('nombre', $request->rol);
+            });
+        if ($request->num_control)
+            $usersTable->where('num_control', $request->num_control);
+        $usuarios = $usersTable->paginate(7);
+        $roles = Roles::all();
+        foreach ($usuarios as $usuario) {
+            $usuario->roles = $roles;
+            $usuario->nombreCompleto = $usuario->getNombre();
+            foreach ($usuario->roles as $rol) {
+                $rol['is'] = $usuario->hasRole($rol->nombre);
+            }
+        }
+        return response()->json($usuarios, 200);
+    }
     public function registrar_usuario(RegistrarUsuarioRequest $request)
     {
-        $user = new User();
-        $user->fill($request->all());
-        $user->password = Str::random(10);
-        $user->cod_confirmacion = Str::random(25);
-        $user->save();
-        // $rol = Roles::where('nombre',$request->rol)->firstOrFail();
-        // $user->roles()->attach($rol);
-        $data = [
-            'nombre' => strtoupper($request->nombre),
-            'email' => $request->email,
-            'cod_confirmacion' => $user->cod_confirmacion
-        ];
-        // Mail::to($request->email)->send(new confirmacion($data));
+        $usuario = new User();
+        $usuario->fill($request->all());
+        // $usuario->password = Str::random(10);
+        $usuario->enviarEmailConfirmacion();
+        $usuario->save();
         return response()->json(['message' => 'Usuario registrado'], 200);
-    }
-    public function agregar_rol(Request $request,$num_control){        
-        $user = User::where('num_control',$num_control)->firstOrFail();
-        $rol = Roles::where('nombre',$request->rol)->firstOrFail();        
-        $user->roles()->attach($rol);
-        return response()->json(['message'=>'Rol agregado'], 200);
-    }
-    public function eliminar_rol(Request $request,$num_control){
-        $user = User::where('num_control',$num_control)->firstOrFail();
-        $rol = Roles::where('nombre',$request->rol)->firstOrFail();
-        $user->roles()->detach($rol);
-        return response()->json(['message'=>'Rol eliminado'], 200);
-    }
-    public function getUsuario($num_control)
-    {
-        $user = User::Where('num_control',$num_control)->firstOrFail();
-        return response()->json($user, 200);
-    }
-    public function buscar_Usuarios($num_control)
-    {
-        $users = User::where('num_control', 'like', '%' . $num_control . '%')->get();
-        return response()->json($users);
     }
     public function actualizar_usuario($num_control, EditarUsuarioRequest $request)
     {
-        
-        $usuario = User::Where('num_control',$num_control)->firstOrFail();        
-        $usuario->fill($request->all());
+        $usuario = User::Where('num_control', $num_control)->firstOrFail();                
+        if($usuario->email !== $request->email){        
+            $usuario->fill($request->all());            
+            $usuario->acceso = 0;
+            $usuario->enviarEmailConfirmacion();
+        }        
         $usuario->save();
         return response()->json(['message' => 'Usuario actualizado'], 200);
     }
     public function eliminar_usuario($num_control)
-    {        
-        $user = User::where('num_control', $num_control)->firstOrFail();
-        $user->delete();
+    {
+        $usuario = User::where('num_control', $num_control)->firstOrFail();
+        dd($usuario->has('proyectos'));
+        $usuario->delete();
         return response()->json(['message' => 'Usuario eliminado'], 200);
+    }
+    public function agregar_rolUsuario(Request $request, $num_control)
+    {
+        $user = User::where('num_control', $num_control)->firstOrFail();
+        $rol = Roles::where('nombre', $request->rol)->firstOrFail();
+        $user->roles()->attach($rol);
+        return response()->json(['message' => 'Rol agregado'], 200);
+    }
+    public function eliminar_rolUsuario(Request $request, $num_control)
+    {
+        $user = User::where('num_control', $num_control)->firstOrFail();
+        $rol = Roles::where('nombre', $request->rol)->firstOrFail();
+        $user->roles()->detach($rol);
+        return response()->json(['message' => 'Rol eliminado'], 200);
+    }
+    public function lineas()
+    {
+        $lineas = LineasDeInvestigacion::all();
+        return response()->json($lineas, 200);
     }
     public function registrar_linea(RegistroLineaRequest $request)
     {
@@ -95,19 +133,10 @@ class OficinaController extends Controller
         $linea->save();
         return response()->json(['message' => 'Linea registrada'], 200);
     }
-    public function lineas()
-    {
-        $lineas = LineasDeInvestigacion::all();
-        return response()->json($lineas, 200);
-    }
-    public function buscar_Lineas($linea_id)
-    {
-        $lineas = LineasDeInvestigacion::where('nombre', 'like', '%' . $linea_id . '%')->get();
-        return response()->json($lineas, 200);
-    }
+    
     public function actualizar_linea(EditarLineaRequest $request, $clave)
     {
-        $linea = LineasDeInvestigacion::Where('clave',$clave)->firstOrFail();
+        $linea = LineasDeInvestigacion::Where('clave', $clave)->firstOrFail();
         $linea->fill($request->all());
         $linea->save();
         return response()->json(['message' => 'Linea actualizada'], 200);
@@ -115,6 +144,8 @@ class OficinaController extends Controller
     public function eliminar_linea($clave)
     {
         $linea = LineasDeInvestigacion::where('clave', $clave)->firstOrFail();
+        if($linea->with('proyectos')->count())
+            return response()->json(['message'=>'No se puede eliminar el registro'], 400);
         $linea->delete();
         return response()->json(['message' => 'Linea eliminada'], 200);
     }
@@ -124,29 +155,19 @@ class OficinaController extends Controller
         $tipo->fill($request->all())->save();
         return response()->json(['message' => 'Tipo de proyecto registrado'], 200);
     }
-    public function actualizar_tipoProyecto(EditarTiposRequest $request,$clave)
+    public function actualizar_tipoProyecto(EditarTiposRequest $request, $clave)
     {
         $tipo = TiposProyectos::where('clave', $clave)->firstOrFail();
         $tipo->fill($request->all())->save();
         return response()->json(['message' => 'Tipo de proyecto actualizado'], 200);
-    }
-    public function buscar_tiposProyecto($proyecto_id)
-    {
-        $tipos = TiposProyectos::where('nombre', 'like', '%' . $proyecto_id . '%')->get();
-        return response()->json($tipos);
-    }
+    }   
     public function eliminar_tipoProyecto($clave)
     {
-        $linea = TiposProyectos::where('clave', $clave)->firstOrFail();
-        $linea->delete();
+        $tipo_proyecto = TiposProyectos::where('clave', $clave)->firstOrFail();
+        if($tipo_proyecto->with('proyectos')->count())
+            return response()->json(['message'=>'No se puede eliminar el registro'], 400);
+        $tipo_proyecto->delete();
         return response()->json(['message' => 'Tipo de proyecto eliminado'], 200);
-    }
-    public function usuariosFiltros($campo, $valorCampo)
-    {
-        //    $users = App\Roles::where('')
-
-        $users = User::where($campo, $valorCampo)->get();
-        return response()->json($users, 200);
     }
     public function foros()
     {
@@ -161,50 +182,52 @@ class OficinaController extends Controller
             $prefijo = $prefijo . "02-";
         } else {
             $prefijo = $prefijo . "01-";
-        }        
-        $foro = new Foros();        
+        }
+        $foro = new Foros();
         $foro->fill($request->all());
-        $foro->slug = "foro-".$request->no_foro;
+        $foro->slug = "foro-" . $request->no_foro;
         $foro->prefijo = $prefijo;
-        $foro->user_id = 18;        
-        $foro->save();        
+        $foro->user_id = 18;
+        $foro->save();
         return response()->json(['message' => 'Foro registrado'], 200);
     }
-    public function actualizar_foro(EditarForoRequest $request,$slug)
-    {        
-        $foro = Foros::Where('slug',$slug)->firstOrFail();
+    public function actualizar_foro(EditarForoRequest $request, $slug)
+    {
+        $foro = Foros::Where('slug', $slug)->firstOrFail();
         $foro->fill($request->all());
-        $foro->slug = "foro-".$request->no_foro;
+        $foro->slug = "foro-" . $request->no_foro;
         $foro->save();
-        return response()->json(['message'=>'Foro actualizado'], 200);
+        return response()->json(['message' => 'Foro actualizado'], 200);
     }
     public function eliminar_foro($slug)
     {
-        $foro = Foros::Where('slug',$slug)->firstOrFail();
+        $foro = Foros::Where('slug', $slug)->firstOrFail();
+        if($foro->with('proyectos')->count())
+            return response()->json(['message'=>'No se puede eliminar el registro'], 400);
         $foro->delete();
         return response()->json(['message' => 'Foro eliminado'], 200);
     }
     public function obtener_foro($slug)
-    {        
+    {
         $foro = Foros::with('fechas')->where('slug', $slug)->firstOrFail();
-        if(!$foro->acceso)
+        if (!$foro->acceso)
             return response()->json(['message' => 'Foro no activo'], 401);
         $posicionET = 0;
-        foreach($foro->fechas as $fecha){            
-            $recesos = $fecha->receso()->select('posicion')->get()->pluck('posicion')->toArray();        
-            $fecha['intervalos'] = $fecha->horarioIntervalos($foro->duracion, 1);                        
-            foreach($fecha['intervalos'] as $hora){                
-                $hora->posicion =$posicionET;                
-                $hora->break = in_array($posicionET,$recesos);
+        foreach ($foro->fechas as $fecha) {
+            $recesos = $fecha->receso()->select('posicion')->get()->pluck('posicion')->toArray();
+            $fecha['intervalos'] = $fecha->horarioIntervalos($foro->duracion, 1);
+            foreach ($fecha['intervalos'] as $hora) {
+                $hora->posicion = $posicionET;
+                $hora->break = in_array($posicionET, $recesos);
                 $posicionET++;
-            }   
+            }
             $fecha->length = $posicionET;
-        }           
+        }
         return response()->json($foro, 200);
     }
     public function configurar_foro(ConfigForoRequest $request, $slug)
     {
-        $foro = Foros::Where('slug',$slug)->firstOrFail();
+        $foro = Foros::Where('slug', $slug)->firstOrFail();
         if (!$foro->acceso)
             return response()->json(['message' => 'Foro no activo'], 500);
         $foro->lim_alumnos = $request->lim_alumnos;
@@ -224,7 +247,7 @@ class OficinaController extends Controller
     {
         $foros = Foros::Where('acceso', true)->get();
         if ($foros->isEmpty()) {
-            $foro = Foros::Where('slug',$slug)->firstOrFail();
+            $foro = Foros::Where('slug', $slug)->firstOrFail();
             $foro->acceso = true;
             $foro->save();
             return response()->json(['message' => 'Foro activado'], 200);
@@ -233,7 +256,7 @@ class OficinaController extends Controller
     }
     public function desactivar_foro($slug)
     {
-        $foro = Foros::Where('slug',$slug)->firstOrFail();
+        $foro = Foros::Where('slug', $slug)->firstOrFail();
         $foro->acceso = false;
         $foro->save();
         return response()->json(['message' => 'Foro desactivado'], 200);
@@ -241,10 +264,10 @@ class OficinaController extends Controller
     public function agregar_foroDocente(Request $request, $slug)
     {
         $foro = Foros::Where([
-            ['slug',$slug],
-            ['acceso',true]
+            ['slug', $slug],
+            ['acceso', true]
         ])->firstOrFail();
-        $user = User::Where('num_control',$request->num_control)->firstOrFail();
+        $user = User::Where('num_control', $request->num_control)->firstOrFail();
         if (is_null($foro))
             return response()->json(['error' => 'Error al identificar el foro activo'], 404);
         if (is_null($user))
@@ -252,28 +275,24 @@ class OficinaController extends Controller
         $user->foros_user()->attach($foro);
         return response()->json(['message' => 'Maestro registrado'], 200);
     }
-    public function asignar_jurado(Request $request,$folio)
+    public function asignar_jurado(Request $request, $folio)
     {
         // pendiente validacion        
-        $proyecto = Proyectos::Where('folio',$folio)->firstOrFail();
+        $proyecto = Proyectos::Where('folio', $folio)->firstOrFail();
         $foro = $proyecto->foro()->first();
         if ($proyecto->jurado()->count() + 1 > $foro->num_maestros)
             return response()->json(['Error' => 'Cantidad de maestros excedido'], 422);
-        $jurado = User::Where('num_control',$request->num_control)->firstOrFail();
+        $jurado = User::Where('num_control', $request->num_control)->firstOrFail();
         $jurado->jurado_proyecto()->attach($proyecto);
-        return response()->json(['message'=>'Maestro agregado al jurado'], 200);
+        return response()->json(['message' => 'Maestro agregado al jurado'], 200);
     }
-    public function eliminar_jurado(Request $request,$folio)
+    public function eliminar_jurado(Request $request, $folio)
     {
-        $jurado = User::Where('num_control',$request->num_control)->firstOrFail();
-        $proyecto = Proyectos::Where('folio',$folio)->firstOrFail();
+        $jurado = User::Where('num_control', $request->num_control)->firstOrFail();
+        $proyecto = Proyectos::Where('folio', $folio)->firstOrFail();
         if ($proyecto->asesor == $jurado->id)
             return response()->json(['Error' => 'No se puede quitar al asesor como parte del jurado'], 422);
         $jurado->jurado_proyecto()->detach($proyecto);
-        return response()->json(['message'=>'Maestro excluido del jurado'], 200);
+        return response()->json(['message' => 'Maestro excluido del jurado'], 200);
     }
-  
-    
-   
-    
 }

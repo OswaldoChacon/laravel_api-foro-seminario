@@ -24,7 +24,7 @@ class CreateUsersTable extends Migration
             $table->string('num_control')->unique();
             $table->string('cod_confirmacion')->nullable();
             $table->timestamp('email_verificado_at')->nullable();
-            $table->boolean('confirmado')->default(false);
+            $table->boolean('acceso')->default(false);
             $table->rememberToken();            
             // $table->timestamps();
         });
