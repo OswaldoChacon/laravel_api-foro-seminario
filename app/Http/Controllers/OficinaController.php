@@ -106,8 +106,9 @@ class OficinaController extends Controller
     }
     public function eliminar_usuario($num_control)
     {
-        $usuario = User::where('num_control', $num_control)->firstOrFail();
-        dd($usuario->has('proyectos'));
+        $usuario = User::where('num_control', $num_control)->with('proyectos')->firstOrFail();
+        if($usuario->proyectos->count())
+            return response()->json(['message'=>'No se puede eliminar el registro'], 400);
         $usuario->delete();
         return response()->json(['message' => 'Usuario eliminado'], 200);
     }
@@ -152,6 +153,11 @@ class OficinaController extends Controller
             return response()->json(['message'=>'No se puede eliminar el registro'], 400);
         $linea->delete();
         return response()->json(['message' => 'Linea eliminada'], 200);
+    }
+    public function tiposProyecto()
+    {
+        $tipos = TiposProyectos::all();
+        return response()->json($tipos, 200);
     }
     public function registrar_tipoProyecto(RegistrarTiposRequest $request)
     {

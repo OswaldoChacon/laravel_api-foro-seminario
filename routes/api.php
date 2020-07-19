@@ -38,15 +38,14 @@ Route::post('forgot_password', 'UsuariosController@forgot_password');
 
 
 Route::get('lineas', 'OficinaController@lineas');
-Route::post('registrar_linea', 'OficinaController@registrar_linea');
-Route::put('actualizar_linea/{linea}', 'OficinaController@actualizar_linea');
-Route::get('buscar_lineas/{linea}', 'OficinaController@buscar_lineas');
-Route::delete('eliminar_linea/{linea}', 'OficinaController@eliminar_linea');
+Route::post('registrar_lineas', 'OficinaController@registrar_linea');
+Route::put('actualizar_lineas/{linea}', 'OficinaController@actualizar_linea');
+Route::delete('eliminar_lineas/{linea}', 'OficinaController@eliminar_linea');
 
-Route::post('registrar_tipoProyecto', 'OficinaController@registrar_tipoProyecto');
-Route::put('actualizar_tipoProyecto/{tipo}', 'OficinaController@actualizar_tipoProyecto');
-Route::get('buscar_tiposProyecto/{tipo}', 'OficinaController@buscar_tiposProyecto');
-Route::delete('eliminar_tipoProyecto/{tipo}', 'OficinaController@eliminar_tipoProyecto');
+Route::get('tiposProyecto', 'OficinaController@tiposProyecto');
+Route::post('registrar_tiposProyecto', 'OficinaController@registrar_tipoProyecto');
+Route::put('actualizar_tiposProyecto/{tipo}', 'OficinaController@actualizar_tipoProyecto');
+Route::delete('eliminar_tiposProyecto/{tipo}', 'OficinaController@eliminar_tipoProyecto');
 
 Route::get('foros', 'OficinaController@foros');
 Route::post('registrar_foro', 'OficinaController@registrar_foro');
