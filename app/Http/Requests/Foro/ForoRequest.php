@@ -4,7 +4,7 @@ namespace App\Http\Requests\Foro;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
-
+use App\Foros;
 class ForoRequest extends FormRequest
 {
     /**
@@ -23,14 +23,11 @@ class ForoRequest extends FormRequest
      * @return array
      */
     public function rules()
-    {
-        //dd($this->input('anio'));
-        //'data.ip' => ['required', 'unique:servers,ip,'.$this->id.',NULL,id,hostname,'.$request->input('hostname')]        
-        return [
-            //|unique:foros,periodo,NULL,NULL,anio'.$this->input('anio'),            
+    {        
+        return [            
             'no_foro' => 'required|numeric|unique:foros,no_foro',
             'nombre' => 'required',
-            'periodo' => 'required|unique:foros,periodo,'.$this->id.',id,anio,'.$this->input('anio'),
+            'periodo' => 'required|unique:foros,periodo,'.$this->id.',id,anio,'.$this->input('anio'),            
             'anio' => 'required|integer|min:' . date('Y') . '|max:' . (date('Y') + 2).',unique:foros,anio,'.$this->id.',id,periodo,'.$this->input('periodo')
         ];
     }

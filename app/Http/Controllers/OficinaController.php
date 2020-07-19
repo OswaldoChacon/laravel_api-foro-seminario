@@ -36,7 +36,8 @@ class OficinaController extends Controller
 
     public function roles(Request $request)
     {
-        $roles = Roles::all();
+        $roles = Roles::all();        
+        $roles[sizeof($roles)]= array('nombre'=>'Todos');
         return response()->json($roles, 200);
     }
     public function agregar_rol(Request $request)
@@ -69,8 +70,11 @@ class OficinaController extends Controller
             });
         if ($request->num_control)
             $usersTable->where('num_control', $request->num_control);
+        
         $usuarios = $usersTable->paginate(7);
-        $roles = Roles::all();
+        if(!$request->num_control  && !$request->rol)
+            $usuarios = User::paginate(7);
+        $roles = Roles::all();        
         foreach ($usuarios as $usuario) {
             $usuario->roles = $roles;
             $usuario->nombreCompleto = $usuario->getNombre();
@@ -243,24 +247,20 @@ class OficinaController extends Controller
         //        'tipos'=>$tipos
         //    ), 200);
     }
-    public function activar_foro($slug)
+    public function activar_foro(Request $request, $slug)
     {
+        $request->validate(['acceso'=>'required|numeric|min:0|max:1' ]);        
         $foros = Foros::Where('acceso', true)->get();
         if ($foros->isEmpty()) {
             $foro = Foros::Where('slug', $slug)->firstOrFail();
-            $foro->acceso = true;
+            $foro->acceso = $request->acceso;
             $foro->save();
-            return response()->json(['message' => 'Foro activado'], 200);
+            $message = $request->acceso == 1 ? 'Foro activado':'Foro desactivado';
+            return response()->json(['message' => $message], 200);
         }
         return response()->json(['message' => 'No se permite tener dos foros activos'], 200);
     }
-    public function desactivar_foro($slug)
-    {
-        $foro = Foros::Where('slug', $slug)->firstOrFail();
-        $foro->acceso = false;
-        $foro->save();
-        return response()->json(['message' => 'Foro desactivado'], 200);
-    }
+   
     public function agregar_foroDocente(Request $request, $slug)
     {
         $foro = Foros::Where([

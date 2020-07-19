@@ -55,8 +55,8 @@ class Handler extends ExceptionHandler
         if ($exception instanceof ModelNotFoundException) {
             return response()->json(['message'=>'Registro no encontrado'], 404);
         }
-        // else if($exception instanceof ValidationException)
-            // return response()->json(['message'=>'Los datos proporcionados no son válidos.'], 422);
+        else if($exception instanceof ValidationException)
+            return response()->json(['message'=>'Los datos proporcionados no son válidos.','errors' => $exception->validator->getMessageBag()], 422);
         return parent::render($request, $exception);
     }
 }

@@ -16,12 +16,10 @@ class AuthJWT
      * @param  \Closure  $next
      * @return mixed
      */
-    public function handle($request, Closure $next)
+    public function handle($request, Closure $next,...$roles)
     {
         try {
-            $user = JWTAuth::parseToken()->authenticate();
-            // $num_control = $this->auth->getPayload()->get('sub');
-            // $user = User::where(compact('num_control'))->firstOrFail();
+            $user = JWTAuth::parseToken()->authenticate();            
         } catch (Exception $e) {
             if ($e instanceof \Tymon\JWTAuth\Exceptions\TokenInvalidException){
                 return response()->json(['mensaje' => 'Token is Invalid'],401);

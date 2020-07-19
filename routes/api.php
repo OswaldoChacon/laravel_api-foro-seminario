@@ -15,24 +15,26 @@ use Tymon\JWTAuth\Facades\JWTAuth;
 |
 */
 
-Route::middleware('auth:api')->get('/user', function (Request $request) {
-    return $request->user();
-});
-
 Route::post('/login', 'AuthController@login');
+Route::post('forgot_password', 'UsuariosController@forgot_password');
+
+// Route::group(['middleware' => ['jwtAuth:Administrador']], function () {
+    Route::get('roles', 'OficinaController@roles');
+    Route::post('agregar_rol', 'OficinaController@agregar_rol');
+    Route::get('actualizar_rol/{rol}', 'OficinaController@actualizar_rol');
+    Route::delete('eliminar_rol/{rol}', 'OficinaController@eliminar_rol');
+
+    Route::get('usuarios', 'OficinaController@usuarios');
+    Route::post('registrar_usuario', 'OficinaController@registrar_usuario');
+    Route::put('actualizar_usuario/{usuario}', 'OficinaController@actualizar_usuario');
+    Route::delete('eliminar_usuario/{usuario}', 'OficinaController@eliminar_usuario');
+    Route::put('agregar_rolUsuario/{usuario}', 'OficinaController@agregar_rolUsuario');
+    Route::delete('eliminar_rolUsuario/{usuario}', 'OficinaController@eliminar_rolUsuario');
+// });
 
 
-Route::get('roles', 'OficinaController@roles');
-Route::post('agregar_rol', 'OficinaController@agregar_rol');
-Route::get('actualizar_rol/{rol}', 'OficinaController@actualizar_rol');
-Route::delete('eliminar_rol/{rol}', 'OficinaController@eliminar_rol');
 
-Route::get('usuarios', 'OficinaController@usuarios');
-Route::post('registrar_usuario', 'OficinaController@registrar_usuario');
-Route::put('actualizar_usuario/{usuario}', 'OficinaController@actualizar_usuario');
-Route::delete('eliminar_usuario/{usuario}', 'OficinaController@eliminar_usuario');
-Route::put('agregar_rolUsuario/{usuario}', 'OficinaController@agregar_rolUsuario');
-Route::delete('eliminar_rolUsuario/{usuario}', 'OficinaController@eliminar_rolUsuario');
+
 
 
 Route::get('lineas', 'OficinaController@lineas');
@@ -53,7 +55,6 @@ Route::delete('eliminar_foro/{foro}', 'OficinaController@eliminar_foro');
 Route::get('obtener_foro/{foro}', 'OficinaController@obtener_foro');
 Route::put('configurar_foro/{foro}', 'OficinaController@configurar_foro');
 Route::put('activar_foro/{foro}', 'OficinaController@activar_foro');
-Route::put('desactivar_foro/{foro}', 'OficinaController@desactivar_foro');
 Route::post('agregar_foroDocente/{foro}', 'OficinaController@agregar_foroDocente');
 
 Route::post('agregar_fechaForo/{foro}', 'HorarioController@agregar_fechaForo');
@@ -75,7 +76,7 @@ Route::delete('eliminar_horarioJurado/{docente}', 'HorarioController@eliminar_ho
 
 Route::post('registrar_proyecto', 'AlumnoController@registrar_proyecto')->middleware('jwtAuth');
 Route::put('actualizar_info/{usuario}', 'AlumnoController@actualizar_info');
-
+Route::put('cambiar_contrasena', 'UsuariosController@cambiar_contrasena')->middleware('jwtAuth:Alumno,Docente,Administrador');
 
 // Route::('','AlumnoController@_proyecto');
 // Route::('','AlumnoController@_proyecto');

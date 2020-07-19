@@ -10,14 +10,13 @@ class AuthController extends Controller
 {
     //
     public function login(Request $request)
-    {
-        dd($request->ip());
+    {        
         $input = $request->only('num_control', 'password');
         $jwt_token = null;        
         if (!$jwt_token = JWTAuth::attempt($input)) {
             return  response()->json([
                 'titulo' => 'Credenciales invalidas',
-                'mensaje' => 'Correo o contraseña no válidos.',
+                'message' => 'Correo o contraseña no válidos.',
             ], 404);
         }
         $user = User::Where('num_control',$request->num_control)->firstOrFail();

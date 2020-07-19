@@ -8,6 +8,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Tymon\JWTAuth\Contracts\JWTSubject;
 use App\Mail\confirmacion;
+use App\Mail\EmailConfirmacion;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 
@@ -133,7 +134,7 @@ class User extends Authenticatable implements JWTSubject
             'password' => $this->password,
             'cod_confirmacion' => $this->cod_confirmacion
         ];
-        Mail::to($this->email)->send(new confirmacion($data));
+        Mail::to($this->email)->send(new EmailConfirmacion($data));
         $this->password = bcrypt($this->password);
     }
 }
