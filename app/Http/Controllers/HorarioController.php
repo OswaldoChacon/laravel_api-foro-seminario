@@ -98,8 +98,12 @@ class HorarioController extends Controller
     }
     public function proyecto_participa(Request $request, $folio){
         $proyecto = Proyectos::Where('folio',$folio)->firstOrFail();
+        $foro = $proyecto->foro()->first();
+        if(!$foro->acceso) 
+            return response()->json(['message' => 'El foro no esta en curso para poder actualizar el proyecto'], 422);
         $proyecto->participa = $request->participa;        
         $proyecto->save();
+            return response()->json(['mensaje' => 'Proyecto actualizado'], 200);
     }
     // public function asignar_jurado(){
     //     $proyectos = Foros::Where('acceso',true)->firstOrFail()->proyectos()->where('participa',1)->get();
@@ -122,7 +126,7 @@ class HorarioController extends Controller
             $fecha->length = sizeof($fecha['intervalos']);
         }    
         $jurado = $foro->proyectos()->where('participa', 1)->with('jurado')->paginate(2)->pluck('jurado')->flatten()->unique('num_control');
-        $jurado = User::select('id','num_control',DB::raw("CONCAT(prefijo,' ',nombre,' ',apellidoP,' ',apellidoM) AS nombre"))//->with('horarios')->get()->pluck('horarios.posicion')->toArray();
+        $jurado = User::select('id','num_control',DB::raw("CONCAT(prefijo,' ',nombre,' ',apellidoP,' ',apellidoM) AS nombreCompleto"))//->with('horarios')->get()->pluck('horarios.posicion')->toArray();
         ->whereHas('jurado_proyecto.foro',function($query){
             $query->where('participa',1)->where('acceso',1);
         })->with('horarios:docente_id,posicion')->paginate(7);              

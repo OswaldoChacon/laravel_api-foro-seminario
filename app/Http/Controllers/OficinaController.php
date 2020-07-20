@@ -254,13 +254,7 @@ class OficinaController extends Controller
         $foro->duracion = $request->duracion;
         $foro->num_maestros = $request->num_maestros;
         $foro->save();
-        return response()->json(['message' => 'Config. Registrada'], 200);
-        //    $tipos = TiposProyectos::all();
-        //    $users = User::all();
-        //    return response()->json(array(
-        //        'users'=>$users,
-        //        'tipos'=>$tipos
-        //    ), 200);
+        return response()->json(['message' => 'Config. Registrada'], 200);       
     }
     public function activar_foro(Request $request, $slug)
     {
@@ -295,21 +289,23 @@ class OficinaController extends Controller
     public function asignar_jurado(Request $request, $folio)
     {
         // pendiente validacion        
-        $proyecto = Proyectos::Where('folio', $folio)->firstOrFail();
+        $proyecto = Proyectos::Where('folio', $folio)->firstOrFail();        
         $foro = $proyecto->foro()->first();
+        if(!$foro->acceso)
+            return response()->json(['message' => 'El foro no esta en curso para poder asignar jurado'], 422);
         if ($proyecto->jurado()->count() + 1 > $foro->num_maestros)
-            return response()->json(['Error' => 'Cantidad de maestros excedido'], 422);
+            return response()->json(['message' => 'Cantidad de maestros excedido'], 422);
         $jurado = User::Where('num_control', $request->num_control)->firstOrFail();
         $jurado->jurado_proyecto()->attach($proyecto);
-        return response()->json(['message' => 'Maestro agregado al jurado'], 200);
+        return response()->json(['mensaje' => 'Maestro agregado al jurado'], 200);
     }
     public function eliminar_jurado(Request $request, $folio)
     {
         $jurado = User::Where('num_control', $request->num_control)->firstOrFail();
         $proyecto = Proyectos::Where('folio', $folio)->firstOrFail();
         if ($proyecto->asesor == $jurado->id)
-            return response()->json(['Error' => 'No se puede quitar al asesor como parte del jurado'], 422);
+            return response()->json(['message' => 'No se puede quitar al asesor como parte del jurado'], 422);
         $jurado->jurado_proyecto()->detach($proyecto);
-        return response()->json(['message' => 'Maestro excluido del jurado'], 200);
+        return response()->json(['mensaje' => 'Maestro excluido del jurado'], 200);
     }
 }
