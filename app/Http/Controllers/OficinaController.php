@@ -36,8 +36,8 @@ class OficinaController extends Controller
 
     public function roles(Request $request)
     {
-        $roles = Roles::all();        
-        $roles[sizeof($roles)]= array('nombre'=>'Todos');
+        $roles = Roles::all();
+        $roles[sizeof($roles)] = array('nombre' => 'Todos');
         return response()->json($roles, 200);
     }
     public function agregar_rol(Request $request)
@@ -69,12 +69,11 @@ class OficinaController extends Controller
                 $query->where('nombre', $request->rol);
             });
         if ($request->num_control)
-            $usersTable->where('num_control', $request->num_control);
-        
+            $usersTable->where('num_control','like', '%'.$request->num_control.'%');
         $usuarios = $usersTable->paginate(7);
-        if(!$request->num_control  && !$request->rol)
-            $usuarios = User::paginate(7);
-        $roles = Roles::all();        
+        // if (!$request->num_control  && !$request->rol)
+            // $usuarios = User::paginate(7);
+        $roles = Roles::all();
         foreach ($usuarios as $usuario) {
             $usuario->roles = $roles;
             $usuario->nombreCompleto = $usuario->getNombre();
@@ -95,20 +94,20 @@ class OficinaController extends Controller
     }
     public function actualizar_usuario($num_control, EditarUsuarioRequest $request)
     {
-        $usuario = User::Where('num_control', $num_control)->firstOrFail();                
-        if($usuario->email !== $request->email){        
-            $usuario->fill($request->all());            
+        $usuario = User::Where('num_control', $num_control)->firstOrFail();
+        if ($usuario->email !== $request->email) {
+            $usuario->fill($request->all());
             $usuario->acceso = 0;
             $usuario->enviarEmailConfirmacion();
-        }        
+        }
         $usuario->save();
         return response()->json(['message' => 'Usuario actualizado'], 200);
     }
     public function eliminar_usuario($num_control)
     {
         $usuario = User::where('num_control', $num_control)->with('proyectos')->firstOrFail();
-        if($usuario->proyectos->count())
-            return response()->json(['message'=>'No se puede eliminar el registro'], 400);
+        if ($usuario->proyectos->count())
+            return response()->json(['message' => 'No se puede eliminar el registro'], 400);
         $usuario->delete();
         return response()->json(['message' => 'Usuario eliminado'], 200);
     }
@@ -138,7 +137,7 @@ class OficinaController extends Controller
         $linea->save();
         return response()->json(['message' => 'Linea registrada'], 200);
     }
-    
+
     public function actualizar_linea(EditarLineaRequest $request, $clave)
     {
         $linea = LineasDeInvestigacion::Where('clave', $clave)->firstOrFail();
@@ -148,9 +147,9 @@ class OficinaController extends Controller
     }
     public function eliminar_linea($clave)
     {
-        $linea = LineasDeInvestigacion::where('clave', $clave)->firstOrFail();
-        if($linea->with('proyectos')->count())
-            return response()->json(['message'=>'No se puede eliminar el registro'], 400);
+        $linea = LineasDeInvestigacion::where('clave', $clave)->with('proyectos')->firstOrFail();
+        if ($linea->proyectos->count())
+            return response()->json(['message' => 'No se puede eliminar el registro'], 400);
         $linea->delete();
         return response()->json(['message' => 'Linea eliminada'], 200);
     }
@@ -170,18 +169,28 @@ class OficinaController extends Controller
         $tipo = TiposProyectos::where('clave', $clave)->firstOrFail();
         $tipo->fill($request->all())->save();
         return response()->json(['message' => 'Tipo de proyecto actualizado'], 200);
-    }   
+    }
     public function eliminar_tipoProyecto($clave)
     {
-        $tipo_proyecto = TiposProyectos::where('clave', $clave)->firstOrFail();
-        if($tipo_proyecto->with('proyectos')->count())
-            return response()->json(['message'=>'No se puede eliminar el registro'], 400);
+        $tipo_proyecto = TiposProyectos::where('clave', $clave)->with('proyectos')->firstOrFail();
+        if ($tipo_proyecto->proyectos->count())
+            return response()->json(['message' => 'No se puede eliminar el registro'], 400);
         $tipo_proyecto->delete();
         return response()->json(['message' => 'Tipo de proyecto eliminado'], 200);
     }
-    public function foros()
+    public function foros(Request $request)
     {
-        $foros = Foros::paginate(7);
+        $forosTable = Foros::query();
+        $forosTable->select('acceso','anio','periodo','no_foro','nombre','slug');
+        if ($request->no_foro)
+            $forosTable->where('no_foro', 'like','%'.$request->no_foro.'%');
+        $foros = $forosTable->paginate(7);
+        foreach($foros as $foro)
+        {
+            $foro->canActivate = $foro->canActivate();
+        }
+        // if (!$request->no_foro)
+            // $foros = Foros::paginate(2);
         return response()->json($foros, 200);
     }
     public function registrar_foro(ForoRequest $request)
@@ -211,9 +220,9 @@ class OficinaController extends Controller
     }
     public function eliminar_foro($slug)
     {
-        $foro = Foros::Where('slug', $slug)->firstOrFail();
-        if($foro->with('proyectos')->count())
-            return response()->json(['message'=>'No se puede eliminar el registro'], 400);
+        $foro = Foros::Where('slug', $slug)->with('proyectos')->firstOrFail();
+        if ($foro->proyectos->count())
+            return response()->json(['message' => 'No se puede eliminar el registro'], 400);
         $foro->delete();
         return response()->json(['message' => 'Foro eliminado'], 200);
     }
@@ -255,18 +264,20 @@ class OficinaController extends Controller
     }
     public function activar_foro(Request $request, $slug)
     {
-        $request->validate(['acceso'=>'required|numeric|min:0|max:1' ]);        
+        $request->validate(['acceso' => 'required|boolean']);
         $foros = Foros::Where('acceso', true)->get();
-        if ($foros->isEmpty()) {
+        if($request->acceso && !$foros->isEmpty())
+            return response()->json(['message' => 'No se permite tener dos foros activos'], 200);    
+        if (!$request->acceso) {
             $foro = Foros::Where('slug', $slug)->firstOrFail();
             $foro->acceso = $request->acceso;
             $foro->save();
-            $message = $request->acceso == 1 ? 'Foro activado':'Foro desactivado';
+            $message = $request->acceso ? 'Foro activado' : 'Foro desactivado';
             return response()->json(['message' => $message], 200);
         }
-        return response()->json(['message' => 'No se permite tener dos foros activos'], 200);
+        
     }
-   
+
     public function agregar_foroDocente(Request $request, $slug)
     {
         $foro = Foros::Where([
