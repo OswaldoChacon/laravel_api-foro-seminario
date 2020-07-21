@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use JWTAuth;
 use App\Mail\ForgotPassword;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Mail;
 use App\Http\Requests\CambiarPasswordRequest;
 
 

@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 
-use App\Http\Requests\Foro\ForoRequest;
+use App\Http\Requests\Foro\RegistroForoRequest;
 use App\Http\Requests\Linea\EditarLineaRequest;
 use App\Http\Requests\Linea\RegistroLineaRequest;
 use App\Http\Requests\Tipos\EditarTiposRequest;
@@ -193,7 +193,7 @@ class OficinaController extends Controller
             // $foros = Foros::paginate(2);
         return response()->json($foros, 200);
     }
-    public function registrar_foro(ForoRequest $request)
+    public function registrar_foro(RegistroForoRequest $request)
     {
         $prefijo = str_split($request->anio);
         $prefijo = $prefijo[2] . $prefijo[3];

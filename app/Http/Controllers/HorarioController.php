@@ -5,19 +5,20 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\GenerarHorario\Problema;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Database\Eloquent\Builder;
-use App\Http\Requests\Foro\FechasRequest;
+use App\Http\Requests\Fecha\RegistroFechaRequest;
+use App\Http\Requests\Fecha\EditarFechaRequest;
 use App\Foros;
 use App\User;
 use App\Fechas_Foros;
 use App\HorarioJurado;
 use App\HorarioBreak;
+use App\Http\Requests\Fecha\BreakRequest;
 use App\Proyectos;
 use App\Roles;
 
 class HorarioController extends Controller
 {
-    public function agregar_fechaForo(FechasRequest $request, $slug)
+    public function agregar_fechaForo(RegistroFechaRequest $request, $slug)
     {
         $fecha = new Fechas_Foros();
         $foro = Foros::Where('slug',$slug)->firstOrFail();
@@ -33,7 +34,7 @@ class HorarioController extends Controller
         $fecha = Fechas_Foros::Where('fecha',$fecha)->firstOrFail();     
         return response()->json($fecha, 200);
     }
-    public function actualizar_fechaForo(Request $request, $fecha)
+    public function actualizar_fechaForo(EditarFechaRequest $request, $fecha)
     {
         $fecha = Fechas_Foros::Where('fecha',$fecha)->firstOrFail();        
         $fecha->fill($request->all());
@@ -47,35 +48,25 @@ class HorarioController extends Controller
         $fecha->delete();
         return response()->json(['Success' => 'Fecha eliminada']);
     }
-    public function agregar_break(Request $request, $fecha)
-    {
-        $request->validate([
-            'posicion'=>'required|numeric|min:0'
-        ]);
+    public function agregar_break(BreakRequest $request, $fecha)
+    {        
         $fecha = Fechas_Foros::Where('fecha',$fecha)->firstOrFail();
-        $foro = $fecha->foro()->first();        
-        // if (is_null($fecha))
-        // return response()->json(['Error' => 'Error al identificar la fecha del foro activo'], 404);
+        $foro = $fecha->foro()->first();     
+        if(!$foro->acceso)   
+            return response()->json(['message'=>'Foro no activo'], 422);        
         $receso = new HorarioBreak();
         $receso->fill($request->all());
         $receso->fechas_foros_id = $fecha->id;
-        // $test = $receso->fechas_foros()->with(['horario_jurado' => function ($query) use ($request) {
-        //     $query->where('posicion', $request->posicion);
-        // }])->get()->pluck('horario_jurado')->flatten()->toArray();
-
-        // $ids_to_delete = array_map(function ($item) {
-        //     return $item['id'];
-        // }, $test);
-        // DB::table('horario_jurado')->whereIn('id', $ids_to_delete)->delete();
+        DB::table('horario_jurado')->where('posicion',$request->posicion)->delete();
         $receso->save();
         return response()->json(['mensaje' => 'Receso agregado'], 200);
     }
-    public function eliminar_break(Request $request,$fecha)
-    {
-        $request->validate([
-            'posicion'=>'required|numeric|min:0'
-        ]);
+    public function eliminar_break(BreakRequest $request,$fecha)
+    {        
         $fecha = Fechas_Foros::Where('fecha',$fecha)->firstOrFail();
+        $foro = $fecha->foro()->first();     
+        if(!$foro->acceso)   
+            return response()->json(['message'=>'Foro no activo'], 422);        
         $receso = HorarioBreak::Where([
             ['fechas_foros_id',$fecha->id],
             ['posicion',$request->posicion]

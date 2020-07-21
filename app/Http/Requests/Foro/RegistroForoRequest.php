@@ -4,8 +4,7 @@ namespace App\Http\Requests\Foro;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
-use App\Foros;
-class ForoRequest extends FormRequest
+class RegistroForoRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.

@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Requests\Foro;
+namespace App\Http\Requests\Fecha;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Carbon\Carbon;
-class FechasRequest extends FormRequest
+class RegistroFechaRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.

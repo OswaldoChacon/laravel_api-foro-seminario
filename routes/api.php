@@ -30,31 +30,32 @@ Route::post('forgot_password', 'UsuariosController@forgot_password');
     Route::delete('eliminar_usuario/{usuario}', 'OficinaController@eliminar_usuario');
     Route::put('agregar_rolUsuario/{usuario}', 'OficinaController@agregar_rolUsuario');
     Route::delete('eliminar_rolUsuario/{usuario}', 'OficinaController@eliminar_rolUsuario');
+
+    Route::get('lineas', 'OficinaController@lineas');
+    Route::post('registrar_lineas', 'OficinaController@registrar_linea');
+    Route::put('actualizar_lineas/{linea}', 'OficinaController@actualizar_linea');
+    Route::delete('eliminar_lineas/{linea}', 'OficinaController@eliminar_linea');
+
+    Route::get('tiposProyecto', 'OficinaController@tiposProyecto');
+    Route::post('registrar_tiposProyecto', 'OficinaController@registrar_tipoProyecto');
+    Route::put('actualizar_tiposProyecto/{tipo}', 'OficinaController@actualizar_tipoProyecto');
+    Route::delete('eliminar_tiposProyecto/{tipo}', 'OficinaController@eliminar_tipoProyecto');
+
+    Route::get('foros', 'OficinaController@foros');
+    Route::get('obtener_foro/{foro}', 'OficinaController@obtener_foro');
+    Route::post('registrar_foro', 'OficinaController@registrar_foro');
+    Route::put('actualizar_foro/{foro}', 'OficinaController@actualizar_foro');
+    Route::delete('eliminar_foro/{foro}', 'OficinaController@eliminar_foro');
+
+    Route::put('configurar_foro/{foro}', 'OficinaController@configurar_foro');
+    Route::put('activar_foro/{foro}', 'OficinaController@activar_foro');
+    Route::post('agregar_foroDocente/{foro}', 'OficinaController@agregar_foroDocente');
 // });
 
 
 
 
 
-
-Route::get('lineas', 'OficinaController@lineas');
-Route::post('registrar_lineas', 'OficinaController@registrar_linea');
-Route::put('actualizar_lineas/{linea}', 'OficinaController@actualizar_linea');
-Route::delete('eliminar_lineas/{linea}', 'OficinaController@eliminar_linea');
-
-Route::get('tiposProyecto', 'OficinaController@tiposProyecto');
-Route::post('registrar_tiposProyecto', 'OficinaController@registrar_tipoProyecto');
-Route::put('actualizar_tiposProyecto/{tipo}', 'OficinaController@actualizar_tipoProyecto');
-Route::delete('eliminar_tiposProyecto/{tipo}', 'OficinaController@eliminar_tipoProyecto');
-
-Route::get('foros', 'OficinaController@foros');
-Route::post('registrar_foro', 'OficinaController@registrar_foro');
-Route::put('actualizar_foro/{foro}', 'OficinaController@actualizar_foro');
-Route::delete('eliminar_foro/{foro}', 'OficinaController@eliminar_foro');
-Route::get('obtener_foro/{foro}', 'OficinaController@obtener_foro');
-Route::put('configurar_foro/{foro}', 'OficinaController@configurar_foro');
-Route::put('activar_foro/{foro}', 'OficinaController@activar_foro');
-Route::post('agregar_foroDocente/{foro}', 'OficinaController@agregar_foroDocente');
 
 Route::post('agregar_fechaForo/{foro}', 'HorarioController@agregar_fechaForo');
 Route::get('obtener_fechaForo/{fecha}', 'HorarioController@obtener_fechaForo');
