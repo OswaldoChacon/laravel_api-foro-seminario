@@ -115,11 +115,10 @@ class User extends Authenticatable implements JWTSubject
         return false;
     }
     public function hasRole($rol)
-    {
-        if ($this->roles()->where('nombre', $rol)->count() > 0) {
+    {        
+        if ($this->roles()->where('nombre', $rol)->count() > 0)             
             return true;
-        }
-        return false;
+        return false;                        
     }
     public function getNombre()
     {

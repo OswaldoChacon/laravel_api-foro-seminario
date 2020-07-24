@@ -27,11 +27,12 @@ class Fechas_Foros extends Model
     {
         // return $this->hasMany('App\HorarioJurado', 'fechas_foros_id');
     }
-    public function horarioIntervalos($minutos, $what)
+    public function horarioIntervalos($minutos, $what, $recesos)
     {
         $aux_inicio = date('H:i', strtotime($this->hora_inicio));
         $aux_termino = date('H:i',strtotime($this->hora_termino));
         $intervalo = array();
+        $posicionET = 0;
         while ($this->hora_inicio <= $this->hora_termino) {
             $newDate = strtotime('+0 hour', strtotime($this->hora_inicio));
             $newDate = strtotime('+' . $minutos . 'minute', $newDate);
@@ -43,8 +44,12 @@ class Fechas_Foros extends Model
             $this->hora_inicio = $newDate;            
             if ($newDate <= $this->hora_termino)                
                 array_push($intervalo,(object)[
-                    'hora'=>$temp,                    
+                    'hora'=>$temp,                  
+                    
+                    // 'posicion'=>$posicionET,
+                    // 'break'=>in_array($posicionET, $recesos)
                 ]);
+            // $posicionET++;
         }        
         $this->hora_inicio = $aux_inicio;
         $this->hora_termino = $aux_termino;

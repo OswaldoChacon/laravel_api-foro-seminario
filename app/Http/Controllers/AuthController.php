@@ -20,12 +20,14 @@ class AuthController extends Controller
             ], 404);
         }
         $user = User::Where('num_control',$request->num_control)->firstOrFail();
+        $user->nombreCompleto = $user->getNombre();
         if(!$user->hasAnyRole($user->roles())){
             return response()->json(['titulo'=>'Acceso denegado','mensaje'=>'No tiene ningún rol asignado'], 403);  
         }
         return  response()->json([            
             'token' => $jwt_token,
-            'profile'=> JWTAuth::user()
+            'profile'=> $user
+            // JWTAuth::user()
         ]);
     }
 }

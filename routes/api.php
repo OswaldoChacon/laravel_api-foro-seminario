@@ -70,6 +70,10 @@ Route::get('jurado', 'HorarioController@jurado');
 Route::post('asignar_jurado/{proyecto}', 'OficinaController@asignar_jurado');
 Route::delete('eliminar_jurado/{proyecto}', 'OficinaController@eliminar_jurado');
 Route::put('proyecto/{proyecto}', 'HorarioController@proyecto_participa');
+
+
+Route::post('agregar_horarioJurado_all/{docente}','HorarioController@agregar_horarioJurado_all');
+Route::delete('eliminar_horarioJurado_all/{docente}','HorarioController@eliminar_horarioJurado_all');
 Route::post('agregar_horarioJurado/{docente}', 'HorarioController@agregar_horarioJurado');
 Route::delete('eliminar_horarioJurado/{docente}', 'HorarioController@eliminar_horarioJurado');
 

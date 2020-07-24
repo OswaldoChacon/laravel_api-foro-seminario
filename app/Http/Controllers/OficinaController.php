@@ -70,16 +70,15 @@ class OficinaController extends Controller
             });
         if ($request->num_control)
             $usersTable->where('num_control','like', '%'.$request->num_control.'%');
-        $usuarios = $usersTable->paginate(7);
-        // if (!$request->num_control  && !$request->rol)
-            // $usuarios = User::paginate(7);
-        $roles = Roles::all();
+        $usuarios = $usersTable->paginate(7);        
+        $roles = Roles::all();                 
         foreach ($usuarios as $usuario) {
-            $usuario->roles = $roles;
-            $usuario->nombreCompleto = $usuario->getNombre();
-            foreach ($usuario->roles as $rol) {
-                $rol['is'] = $usuario->hasRole($rol->nombre);
-            }
+            // $usuario->roles = $roles;            
+            $usuario->nombreCompleto = $usuario->getNombre();            
+            foreach ($roles as $rol) {
+                $rol->is = $usuario->hasRole($rol->nombre);                
+            }                        
+            $usuario->roles = $roles->toArray();            
         }
         return response()->json($usuarios, 200);
     }
