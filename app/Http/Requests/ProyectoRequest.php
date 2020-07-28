@@ -28,8 +28,8 @@ class ProyectoRequest extends FormRequest
             'titulo'=>'required|unique:proyectos,titulo',
             'objetivo'=>'required',
             'empresa'=>'required',
-            'lineadeinvestigacion_id'=>'required',
-            'tipos_proyectos_id'=>'required',
+            'linea'=>'required',
+            'tipo'=>'required',
             'asesor'=>'required',
         ];
     }

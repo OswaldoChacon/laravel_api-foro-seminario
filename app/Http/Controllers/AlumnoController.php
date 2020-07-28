@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use App\Proyectos;
 use App\Foros;
 use App\LineasDeInvestigacion;
+use App\Notificaciones;
 use App\TiposProyectos;
 use App\User;
 
@@ -20,7 +21,9 @@ class AlumnoController extends Controller
         // $this->middleware('jwtAuth');
     }
 
-    public function foro_actual(){        
+    public function foro_actual(){   
+        if(!JWTAuth::user()->hasProject())      
+            return response()->json(['message'=>'Tienes un proyecto en curso'], 400);     
         $foro = Foros::select('no_foro','nombre','periodo','anio','lim_alumnos')->where('acceso',true)->first();
         $foro->lim_alumnos -=1;
         $lineas = LineasDeInvestigacion::all();
@@ -40,44 +43,46 @@ class AlumnoController extends Controller
         $user = JWTAuth::user();
         // dd($user);
         if(!JWTAuth::user()->hasProject())      
-            return response()->json(['mensaje'=>'Tienes un proyecto en curso'], 200);
+            return response()->json(['mensaje'=>'Tienes un proyecto en curso'], 400);
         
         $foro = Foros::where('acceso',true)->firstOrFail();
-        // if(!$foro->acceso)
-        //     return response()->json(['mensaje'=>'Foro no activo'], 200);
+        if(!$foro->acceso)
+            return response()->json(['mensaje'=>'Foro no activo'], 400);
         $receptores = array(); 
         
         array_push($receptores, $request->asesor);           
         for ($i = 0; $i < sizeof($request->alumnos); $i++) {
             if ($request->alumnos[$i] != null) {            
-                if (!in_array($request->alumnos[$i], $receptores)) {
-                    // $user =                     
+                if (!in_array($request->alumnos[$i], $receptores)) {                    
                     if(!User::where('num_control',$request->alumnos[$i])->firstOrFail()->hasProject())
-                    return response()->json(['mensaje'=>'Uno de tus integrantes ya cuenta con un proyecto registrado'], 422);
-                    // return back()->with('error','Uno de tus integrantes ya cuenta con un proyecto registrado');
+                    return response()->json(['mensaje'=>'Uno de tus integrantes ya cuenta con un proyecto registrado'], 422);                    
                     array_push($receptores, $request->alumnos[$i]);                                        
                 } else {
-                    return response()->json(['mensaje'=>'Has elegido al mismo integrante en más de una ocasión.'], 422);
-                    // return back()->with('error', 'Has elegido al mismo integrante en más de una ocasión.');
-                }
-                // dd("l");
+                    return response()->json(['mensaje'=>'Has elegido al mismo integrante en más de una ocasión.'], 422);                    
+                }                
             }
         }
-
         $proyecto = new Proyectos();
         $folio = $proyecto->folio($foro);
-        $proyecto->fill($request->all());
-        // $asesor = User::select('id')->where('num_control',$request->asesor)->firstOrFail()->id;
-        // dd($asesor);
+        $proyecto->fill($request->all());        
         $proyecto->asesor = User::where('num_control',$request->asesor)->firstOrFail()->id;
-        $proyecto->lineadeinvestigacion_id = LineasDeInvestigacion::where('clave',$request->linea)->firstOrFail()->id;
-        // dd($proyecto);
+        $proyecto->lineadeinvestigacion_id = LineasDeInvestigacion::where('clave',$request->linea)->firstOrFail()->id;        
         $proyecto->tipos_proyectos_id = TiposProyectos::where('clave',$request->tipo)->firstOrFail()->id;
         $proyecto->foros_id = $foro->id;
-        $proyecto->folio = $folio;            
-        // dd($proyecto);
-        // $proyecto->asesor = $request->asesor;
-        // $proyecto->save();
+        $proyecto->folio = $folio;                    
+        $proyecto->save();
+
+        JWTAuth::user()->proyectos()->attach($proyecto);
+        for ($i = 0; $i < sizeof($receptores); $i++) {
+            $usuario = User::where('num_control',$receptores[$i])->firstOrFail();            
+            $notificacion = new Notificaciones();
+            $notificacion->emisor = JWTAuth::user()->id;            
+            $notificacion->receptor = $usuario->id;            
+            $notificacion->proyecto_id = $proyecto->id;
+            $notificacion->save();                
+            if($usuario->id != $proyecto->asesor)
+                $usuario->proyectos()->attach($proyecto);            
+        }                   
         return response()->json(['mensaje'=>'Proyecto registrado'], 200);
     }
 

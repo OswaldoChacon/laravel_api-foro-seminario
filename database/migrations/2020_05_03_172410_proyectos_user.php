@@ -18,8 +18,7 @@ class ProyectosUser extends Migration
             $table->unsignedInteger('proyectos_id');
             $table->foreign('proyectos_id')->references('id')->on('proyectos')->onDelete('cascade');
             $table->unsignedInteger('user_id');
-            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
-            $table->timestamps();
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');            
         });
     }
 

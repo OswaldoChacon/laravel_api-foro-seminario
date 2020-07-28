@@ -233,7 +233,7 @@ class OficinaController extends Controller
         $posicionET = 0;
         foreach ($foro->fechas as $fecha) {
             $recesos = $fecha->receso()->select('posicion')->get()->pluck('posicion')->toArray();
-            $fecha['intervalos'] = $fecha->horarioIntervalos($foro->duracion, 1);
+            $fecha['intervalos'] = $fecha->horarioIntervalos($foro->duracion, 1,$recesos);
             foreach ($fecha['intervalos'] as $hora) {
                 $hora->posicion = $posicionET;
                 $hora->break = in_array($posicionET, $recesos);
@@ -260,7 +260,7 @@ class OficinaController extends Controller
         $request->validate(['acceso' => 'required|boolean']);
         $foros = Foros::Where('acceso', true)->get();
         if($request->acceso && !$foros->isEmpty())
-            return response()->json(['message' => 'No se permite tener dos foros activos'], 200);    
+            return response()->json(['message' => 'No se permite tener dos foros activos'], 400);    
         if (!$request->acceso) {
             $foro = Foros::Where('slug', $slug)->firstOrFail();
             $foro->acceso = $request->acceso;

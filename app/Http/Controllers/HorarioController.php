@@ -13,6 +13,7 @@ use App\Fechas_Foros;
 use App\HorarioJurado;
 use App\HorarioBreak;
 use App\Http\Requests\Fecha\BreakRequest;
+use App\Jurados;
 use App\Proyectos;
 use App\Roles;
 
@@ -74,12 +75,21 @@ class HorarioController extends Controller
         $receso->delete();
         return response()->json(['mensaje' => 'Break eliminado'], 200);
     }
-    public function proyectos_foro($slug)
-    {
+    public function proyectos_foro(Request $request, $slug)
+    {        
+        $proyectosTable = Proyectos::query();
         $foro = Foros::Where('slug', $slug)->firstOrFail();
-        $proyectos = $foro->proyectos()->select('id', 'folio', 'titulo', 'participa')->with(['jurado' => function ($query) {
+        if ($request->folio)
+            $proyectosTable->where('folio', 'like', '%' . $request->folio . '%');
+
+
+        $proyectos = $proyectosTable->with(['jurado' => function ($query) {
             $query->select('num_control');
-        }])->where('aceptado', 1)->paginate(8);
+        }])->where('aceptado', 1)->paginate(7);        
+        // $proyectos = $foro->proyectos()->select('id', 'folio', 'titulo', 'participa')->with(['jurado' => function ($query) {
+        //     $query->select('num_control');
+        // }])->where('aceptado', 1)->paginate(8);
+
         $docentes = User::select('num_control', DB::raw("CONCAT(prefijo,' ',nombre,' ',apellidoP,' ',apellidoM) AS nombre"))->whereHas('roles', function ($query) {
             $query->where('roles.nombre', 'Docente');
         })->get();
@@ -108,61 +118,80 @@ class HorarioController extends Controller
         $foro = Foros::where('acceso', true)->firstOrFail();
         // if (!is_null($foro))
         $posicionET = 0;
-        $fechas = $foro->fechas()->get();                
+        $fechas = $foro->fechas()->get();
         foreach ($fechas as $fecha) {
-            $recesos = $fecha->receso()->select('posicion')->get()->pluck('posicion')->toArray();            
-            $intervalos = $fecha->horarioIntervalos($foro->duracion, 1, $recesos);            
-            foreach ($intervalos as $key => $hora) {                            
-                $hora->posicion = $posicionET;                   
-                $hora->selected = false;             
-                // $hora->break = in_array($posicionET, $recesos);                                
-                if(in_array($posicionET,$recesos))
-                    unset($intervalos[$key]);                          
+            $recesos = $fecha->receso()->select('posicion')->get()->pluck('posicion')->toArray();
+            $intervalos = $fecha->horarioIntervalos($foro->duracion, 1, $recesos);
+            foreach ($intervalos as $key => $hora) {
+                $hora->posicion = $posicionET;
+                $hora->selected = false;                
+                if (in_array($posicionET, $recesos))
+                    unset($intervalos[$key]);
                 $posicionET++;
-                
             }
-            $intervalos = array_values($intervalos);            
-            $fecha->intervalos = $intervalos;
-            // $fecha->length = sizeof($fecha['intervalos']);
+            $intervalos = array_values($intervalos);
+            $fecha->intervalos = $intervalos;            
             $fecha->checked = false;
         }
         // $jurado = $foro->proyectos()->where('participa', 1)->with('jurado')->paginate(2)->pluck('jurado')->flatten()->unique('num_control');
+        // $juradoTable = User::query();
+        // $juradoTable->select('id', 'num_control', DB::raw("CONCAT(prefijo,' ',nombre,' ',apellidoP,' ',apellidoM) AS nombreCompleto"));
+        // $jurado = $juradoTable->whereHas('jurado_proyecto.foro', function ($query) {
+        //         $query->where('participa', 1)->where('acceso', 1);
+        //     })->with('horarios:docente_id,posicion')
+        //     ->paginate(7)->filter(function($value){
+        //         return count($value->horarios) > 0;
+        //     });
+
+        // Paginator::make()        
+        
+        // $jurado
+       
+        // $jurado = $juradoTable->paginate(7);
+        // $jurado->paginate(7);
+
+
         $jurado = User::select('id', 'num_control', DB::raw("CONCAT(prefijo,' ',nombre,' ',apellidoP,' ',apellidoM) AS nombreCompleto")) //->with('horarios')->get()->pluck('horarios.posicion')->toArray();
             ->whereHas('jurado_proyecto.foro', function ($query) {
                 $query->where('participa', 1)->where('acceso', 1);
-            })->with('horarios:docente_id,posicion') //->pluck('posicion')
-            ->paginate(7);            
-            // ->get()
-            // ->flatten('horarios')->unique('posicion');
+            })->with('horarios:docente_id,posicion')->withCount('horarios')            
+            ->paginate(7);
 
+        // $juradoData = $jurado->getCollection();
+        // $juradoDataFilter = $juradoData->filter(function($value){            
+        //             return count($value->horarios) > 0;
+        // });        
+        
+        // $jurado->setCollection($juradoDataFilter);        
         return response()->json(['jurado' => $jurado, 'fechas' => $fechas], 200);
     }
+
     
     public function agregar_horarioJurado_all(Request $request, $num_control)
-    {        
+    {
         $docente = User::where('num_control', $num_control)->firstOrFail();
         $fecha = Fechas_Foros::Where('fecha', $request->fecha['fecha'])->firstOrFail();
-        $docente->horarios()->where('fechas_foros_id',$fecha->id)->delete();        
+        $docente->horarios()->where('fechas_foros_id', $fecha->id)->delete();
         $foro = $fecha->foro()->first();
         if (!$foro->acceso)
             return response()->json(['message' => 'Foro no activo'], 401);
-        foreach ($request->fecha['intervalos'] as $intervalo) {            
-                $horariojurado = new HorarioJurado();
-                $horariojurado->docente_id = $docente->id;
-                $horariojurado->fechas_foros_id = $fecha->id;
-                $horariojurado->hora = $intervalo['hora'];
-                $horariojurado->posicion = $intervalo['posicion'];
-                $horariojurado->fill($request->all());
-                $horariojurado->save();            
-        }     
-        return response()->json(['mensaje'=>'Horarios agregados'], 200);
+        foreach ($request->fecha['intervalos'] as $intervalo) {
+            $horariojurado = new HorarioJurado();
+            $horariojurado->docente_id = $docente->id;
+            $horariojurado->fechas_foros_id = $fecha->id;
+            $horariojurado->hora = $intervalo['hora'];
+            $horariojurado->posicion = $intervalo['posicion'];
+            $horariojurado->fill($request->all());
+            $horariojurado->save();
+        }
+        return response()->json(['mensaje' => 'Horarios agregados'], 200);
     }
     public function eliminar_horarioJurado_all(Request $request, $num_control)
     {
         $docente = User::where('num_control', $num_control)->firstOrFail();
-        $fecha = Fechas_Foros::where('fecha',$request->fecha)->firstOrFail();
-        $docente->horarios()->where('fechas_foros_id',$fecha->id)->delete();        
-        return response()->json(['mensaje'=>'Horarios eliminados'], 200);
+        $fecha = Fechas_Foros::where('fecha', $request->fecha)->firstOrFail();
+        $docente->horarios()->where('fechas_foros_id', $fecha->id)->delete();
+        return response()->json(['mensaje' => 'Horarios eliminados'], 200);
     }
     public function agregar_horarioJurado(Request $request, $num_control)
     {
