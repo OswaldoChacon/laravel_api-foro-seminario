@@ -93,4 +93,13 @@ Route::put('cambiar_contrasena', 'UsuariosController@cambiar_contrasena')->middl
 //Alumno
 
 Route::get('foro_actual', 'AlumnoController@foro_actual');
+Route::get('lista_alumnos','AlumnoController@lista_alumnos');
+Route::get('misNotificaciones','UsuariosController@misNotificaciones');
+Route::get('miSolicitud','UsuariosController@miSolicitud');
+Route::post('responder_notificacion/{proyecto}','UsuariosController@responder_notificacion');
+Route::post('agregar_integrante/{proyecto}','AlumnoController@agregar_integrante');
+
+
+
+Route::get('notificaciones/{proyecto}','UsuariosController@notificaciones');
 // ->middleware('jwtAuth:Alumno');

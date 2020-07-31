@@ -33,21 +33,25 @@ class AlumnoController extends Controller
         })->get();
         $alumnos = User::select('num_control',DB::raw("CONCAT(nombre,' ',apellidoP,' ',apellidoM) AS nombre"))->whereHas('roles',function($query){
             $query->where('roles.nombre','Alumno');
-        })->doesntHave('proyectos')->where('num_control','!=',JWTAuth::user()->num_control)->get();        
+        })->doesntHave('proyectos')->where('num_control','!=',JWTAuth::user()->num_control)->get();
         return response()->json(['foro'=>$foro,'lineas'=>$lineas,'tipos'=>$tipos_proyectos,'docentes'=>$docentes,'alumnos'=>$alumnos], 200);
     }
+    public function lista_alumnos()
+    {
+        $alumnos = User::select('num_control',DB::raw("CONCAT(nombre,' ',apellidoP,' ',apellidoM) AS nombre"))->whereHas('roles',function($query){
+            $query->where('roles.nombre','Alumno');
+        })->doesntHave('proyectos')->where('num_control','!=',JWTAuth::user()->num_control)->get();
+        return response()->json($alumnos, 200);
+    }
     public function registrar_proyecto(ProyectoRequest $request)
-    {    
-        // $foro = Foros::findOrFail($foro_id);  
-        // dd($request->alumnos);
-        $user = JWTAuth::user();
-        // dd($user);
+    {           
+        $user = JWTAuth::user();        
         if(!JWTAuth::user()->hasProject())      
-            return response()->json(['mensaje'=>'Tienes un proyecto en curso'], 400);
+            return response()->json(['message'=>'Tienes un proyecto en curso'], 400);
         
         $foro = Foros::where('acceso',true)->firstOrFail();
         if(!$foro->acceso)
-            return response()->json(['mensaje'=>'Foro no activo'], 400);
+            return response()->json(['message'=>'Foro no activo'], 400);
         $receptores = array(); 
         
         array_push($receptores, $request->asesor);           
@@ -55,10 +59,10 @@ class AlumnoController extends Controller
             if ($request->alumnos[$i] != null) {            
                 if (!in_array($request->alumnos[$i], $receptores)) {                    
                     if(!User::where('num_control',$request->alumnos[$i])->firstOrFail()->hasProject())
-                    return response()->json(['mensaje'=>'Uno de tus integrantes ya cuenta con un proyecto registrado'], 422);                    
+                    return response()->json(['message'=>'Uno de tus integrantes ya cuenta con un proyecto registrado'], 422);                    
                     array_push($receptores, $request->alumnos[$i]);                                        
                 } else {
-                    return response()->json(['mensaje'=>'Has elegido al mismo integrante en más de una ocasión.'], 422);                    
+                    return response()->json(['message'=>'Has elegido al mismo integrante en más de una ocasión.'], 422);                    
                 }                
             }
         }
@@ -81,11 +85,26 @@ class AlumnoController extends Controller
             $notificacion->proyecto_id = $proyecto->id;
             $notificacion->save();                
             if($usuario->id != $proyecto->asesor)
-                $usuario->proyectos()->attach($proyecto);            
+                $usuario->proyectos()->attach($proyecto);
         }                   
         return response()->json(['mensaje'=>'Proyecto registrado'], 200);
     }
 
+    public function agregar_integrante(Request $request, $folio)
+    {
+        $proyecto = Proyectos::where('folio',$folio)->firstOrFail();
+        $foro = $proyecto->foro()->firstOrFail();
+        if($proyecto->integrantes()->count() >= $foro->lim_alumnos)
+            return response()->json(['message'=>'No puedes agregar más integrantes al proyecto'], 400);
+        $usuario = User::where('num_control',$request->num_control)->firstOrFail();
+        $usuario->proyectos()->attach($proyecto);
+        $notificacion = new Notificaciones();
+        $notificacion->emisor = 81;
+        $notificacion->receptor = $usuario->id;
+        $notificacion->proyecto_id = $proyecto->id;
+        $notificacion->save();        
+        return response()->json(['message'=>'Integrante añadido'], 200);        
+    }
     public function actualizar_info(Request $request,$user_id)
     {             
         // JWTAuth::toUser($request->token);         

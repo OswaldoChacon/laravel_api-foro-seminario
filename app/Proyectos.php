@@ -3,6 +3,7 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Proyectos extends Model
 {
@@ -32,7 +33,14 @@ class Proyectos extends Model
     {       
         return $this->belongsToMany(User::class,'jurados','proyecto_id','docente_id');    
     }
-
+    public function notificacion()
+    {
+        return $this->hasMany(Notificaciones::class,'proyecto_id');
+    }
+    public function integrantes()
+    {
+        return $this->BelongsToMany(User::class);
+    }
     public function folio(Foros $foro)
     {
         $folio = $foro->prefijo;
