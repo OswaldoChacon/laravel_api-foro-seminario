@@ -101,6 +101,10 @@ class User extends Authenticatable implements JWTSubject
         }
         return $roles;
     }
+    public function proyectoActual()
+    {
+        
+    }
     public function hasProject()
     {
         // dd($this->num_control);

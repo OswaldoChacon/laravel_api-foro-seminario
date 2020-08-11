@@ -24,6 +24,11 @@ Route::post('forgot_password', 'UsuariosController@forgot_password');
     Route::get('actualizar_rol/{rol}', 'OficinaController@actualizar_rol');
     Route::delete('eliminar_rol/{rol}', 'OficinaController@eliminar_rol');
 
+    Route::get('solicitudes', 'OficinaController@solicitudes');
+    Route::post('agregar_solicitud', 'OficinaController@agregar_solicitud');
+    Route::get('actualizar_solicitud/{solicitud}', 'OficinaController@actualizar_solicitud');
+    Route::delete('eliminar_solicitud/{solicitud}', 'OficinaController@eliminar_solicitud');
+
     Route::get('usuarios', 'OficinaController@usuarios');
     Route::post('registrar_usuario', 'OficinaController@registrar_usuario');
     Route::put('actualizar_usuario/{usuario}', 'OficinaController@actualizar_usuario');
@@ -96,8 +101,9 @@ Route::get('foro_actual', 'AlumnoController@foro_actual');
 Route::get('lista_alumnos','AlumnoController@lista_alumnos');
 Route::get('misNotificaciones','UsuariosController@misNotificaciones');
 Route::get('miSolicitud','UsuariosController@miSolicitud');
-Route::post('responder_notificacion/{proyecto}','UsuariosController@responder_notificacion');
+Route::put('responder_notificacion/{proyecto}','UsuariosController@responder_notificacion');
 Route::post('agregar_integrante/{proyecto}','AlumnoController@agregar_integrante');
+Route::delete('eliminar_integrante/{proyecto}','AlumnoController@eliminar_integrante');
 
 
 

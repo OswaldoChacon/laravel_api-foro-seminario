@@ -21,7 +21,8 @@ class Notificaciones extends Migration
             $table->foreign('receptor')->references('id')->on('users')->onDelete('cascade');
             $table->unsignedInteger('proyecto_id');
             $table->foreign('proyecto_id')->references('id')->on('proyectos')->onDelete('cascade');
-            $table->boolean('respuesta')->default(false);            
+            $table->boolean('respuesta')->nullable();
+            // default(false);            
         });
     }
 

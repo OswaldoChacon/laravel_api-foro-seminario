@@ -37,7 +37,7 @@ class OficinaController extends Controller
     public function roles(Request $request)
     {
         $roles = Roles::all();
-        $roles[sizeof($roles)] = array('nombre' => 'Todos');
+        // $roles[sizeof($roles)] = array('nombre' => 'Todos');
         return response()->json($roles, 200);
     }
     public function agregar_rol(Request $request)
