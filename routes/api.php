@@ -20,14 +20,14 @@ Route::post('forgot_password', 'UsuariosController@forgot_password');
 
 // Route::group(['middleware' => ['jwtAuth:Administrador']], function () {
     Route::get('roles', 'OficinaController@roles');
-    Route::post('agregar_rol', 'OficinaController@agregar_rol');
-    Route::get('actualizar_rol/{rol}', 'OficinaController@actualizar_rol');
-    Route::delete('eliminar_rol/{rol}', 'OficinaController@eliminar_rol');
+    Route::post('agregar_roles', 'OficinaController@agregar_rol');
+    Route::put('actualizar_roles/{rol}', 'OficinaController@actualizar_rol');
+    Route::delete('eliminar_roles/{rol}', 'OficinaController@eliminar_rol');
 
     Route::get('solicitudes', 'OficinaController@solicitudes');
-    Route::post('agregar_solicitud', 'OficinaController@agregar_solicitud');
-    Route::get('actualizar_solicitud/{solicitud}', 'OficinaController@actualizar_solicitud');
-    Route::delete('eliminar_solicitud/{solicitud}', 'OficinaController@eliminar_solicitud');
+    Route::post('agregar_solicitudes', 'OficinaController@agregar_solicitud');
+    Route::put('actualizar_solicitudes/{solicitud}', 'OficinaController@actualizar_solicitud');
+    Route::delete('eliminar_solicitudes/{solicitud}', 'OficinaController@eliminar_solicitud');
 
     Route::get('usuarios', 'OficinaController@usuarios');
     Route::post('registrar_usuario', 'OficinaController@registrar_usuario');

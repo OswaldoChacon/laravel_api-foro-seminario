@@ -9,7 +9,7 @@ class Roles extends Model
     //
     public $timestamps = false;
     protected $fillable = [
-        'nombre'
+        'nombre_'
     ];
     protected $append = ['is'];
     protected $hidden=['id','pivot'];

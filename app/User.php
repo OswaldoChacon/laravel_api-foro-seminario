@@ -113,7 +113,7 @@ class User extends Authenticatable implements JWTSubject
         })->orWhereHas('proyectos.foro', function (Builder $query) {
             $query->where('acceso', true);
         })->whereHas('roles', function (Builder $query) {
-            $query->where('roles.nombre', 'Alumno');
+            $query->where('roles.nombre_', 'Alumno');
         })->where('num_control', $this->num_control)->count() > 0)
             return false;
         return true;
@@ -128,7 +128,7 @@ class User extends Authenticatable implements JWTSubject
     }
     public function hasRole($rol)
     {        
-        if ($this->roles()->where('nombre', $rol)->count() > 0)             
+        if ($this->roles()->where('nombre_', $rol)->count() > 0)             
             return true;
         return false;                        
     }

@@ -91,7 +91,7 @@ class HorarioController extends Controller
         // }])->where('aceptado', 1)->paginate(8);
 
         $docentes = User::select('num_control', DB::raw("CONCAT(prefijo,' ',nombre,' ',apellidoP,' ',apellidoM) AS nombre"))->whereHas('roles', function ($query) {
-            $query->where('roles.nombre', 'Docente');
+            $query->where('roles.nombre_', 'Docente');
         })->get();
         foreach ($docentes as $docente) {
             $docente['jurado'] = false;

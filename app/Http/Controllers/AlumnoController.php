@@ -31,10 +31,10 @@ class AlumnoController extends Controller
         $lineas = LineasDeInvestigacion::all();
         $tipos_proyectos = TiposProyectos::all();
         $docentes = User::select('num_control', DB::raw("CONCAT(prefijo,' ',nombre,' ',apellidoP,' ',apellidoM) AS nombre"))->whereHas('roles', function ($query) {
-            $query->where('roles.nombre', 'Docente');
+            $query->where('roles.nombre_', 'Docente');
         })->get();
         $alumnos = User::select('num_control', DB::raw("CONCAT(nombre,' ',apellidoP,' ',apellidoM) AS nombre"))->whereHas('roles', function ($query) {
-            $query->where('roles.nombre', 'Alumno');
+            $query->where('roles.nombre_', 'Alumno');
         })->doesntHave('proyectos')->where('num_control', '!=', JWTAuth::user()->num_control)->get();
         return response()->json(['foro' => $foro, 'lineas' => $lineas, 'tipos' => $tipos_proyectos, 'docentes' => $docentes, 'alumnos' => $alumnos], 200);
     }
@@ -50,7 +50,7 @@ class AlumnoController extends Controller
         //     $query->where('roles.nombre', 'Alumno');
         // })->doesntHave('proyectos')->where('num_control', '!=', $usuario->num_control)->get();
         $alumnos = User::select('num_control', DB::raw("CONCAT(nombre,' ',apellidoP) AS nombre"))->whereHas('roles', function ($query) {
-            $query->where('roles.nombre', 'Alumno');
+            $query->where('roles.nombre_', 'Alumno');
         })->where('num_control', '!=', $usuario->num_control)->get();
         foreach ($alumnos as $alumno) {            
             $alumno->myTeam = $miEquipo->contains('num_control',$alumno->num_control);
