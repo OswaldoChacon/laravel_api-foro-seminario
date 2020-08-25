@@ -97,7 +97,7 @@ class User extends Authenticatable implements JWTSubject
     {
         $roles = array();
         foreach ($this->roles as $rol) {
-            array_push($roles, $rol->nombre);
+            array_push($roles, $rol->nombre_);
         }
         return $roles;
     }
@@ -107,7 +107,6 @@ class User extends Authenticatable implements JWTSubject
     }
     public function hasProject()
     {
-        // dd($this->num_control);
         if (User::whereHas('proyectos.foro', function (Builder $query) {
             $query->where('promedio', '>', 69)->where('acceso', false);
         })->orWhereHas('proyectos.foro', function (Builder $query) {

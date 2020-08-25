@@ -12,7 +12,7 @@ class Proyectos extends Model
     protected $fillable = [
         'titulo', 'empresa', 'objetivo', 'asesor'
     ];
-    protected $hidden = ['id','lineadeinvestigacion_id','tipos_proyectos_id','foros_id','asesor'];
+    protected $hidden = ['id','lineadeinvestigacion_id','tipos_proyectos_id','foros_id','asesor','pivot'];
     public function asesora()
     {
         return $this->belongsTo(User::class,'asesor');

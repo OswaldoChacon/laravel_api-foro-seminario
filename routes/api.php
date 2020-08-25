@@ -18,7 +18,7 @@ use Tymon\JWTAuth\Facades\JWTAuth;
 Route::post('/login', 'AuthController@login');
 Route::post('forgot_password', 'UsuariosController@forgot_password');
 
-// Route::group(['middleware' => ['jwtAuth:Administrador']], function () {
+Route::group(['middleware' => ['jwtAuth:Administrador']], function () {
     Route::get('roles', 'OficinaController@roles');
     Route::post('agregar_roles', 'OficinaController@agregar_rol');
     Route::put('actualizar_roles/{rol}', 'OficinaController@actualizar_rol');
@@ -28,13 +28,6 @@ Route::post('forgot_password', 'UsuariosController@forgot_password');
     Route::post('agregar_solicitudes', 'OficinaController@agregar_solicitud');
     Route::put('actualizar_solicitudes/{solicitud}', 'OficinaController@actualizar_solicitud');
     Route::delete('eliminar_solicitudes/{solicitud}', 'OficinaController@eliminar_solicitud');
-
-    Route::get('usuarios', 'OficinaController@usuarios');
-    Route::post('registrar_usuario', 'OficinaController@registrar_usuario');
-    Route::put('actualizar_usuario/{usuario}', 'OficinaController@actualizar_usuario');
-    Route::delete('eliminar_usuario/{usuario}', 'OficinaController@eliminar_usuario');
-    Route::put('agregar_rolUsuario/{usuario}', 'OficinaController@agregar_rolUsuario');
-    Route::delete('eliminar_rolUsuario/{usuario}', 'OficinaController@eliminar_rolUsuario');
 
     Route::get('lineas', 'OficinaController@lineas');
     Route::post('registrar_lineas', 'OficinaController@registrar_linea');
@@ -46,6 +39,13 @@ Route::post('forgot_password', 'UsuariosController@forgot_password');
     Route::put('actualizar_tiposProyecto/{tipo}', 'OficinaController@actualizar_tipoProyecto');
     Route::delete('eliminar_tiposProyecto/{tipo}', 'OficinaController@eliminar_tipoProyecto');
 
+    Route::get('usuarios', 'OficinaController@usuarios');
+    Route::post('registrar_usuario', 'OficinaController@registrar_usuario');
+    Route::put('actualizar_usuario/{usuario}', 'OficinaController@actualizar_usuario');
+    Route::delete('eliminar_usuario/{usuario}', 'OficinaController@eliminar_usuario');
+    Route::put('agregar_rolUsuario/{usuario}', 'OficinaController@agregar_rolUsuario');
+    Route::delete('eliminar_rolUsuario/{usuario}', 'OficinaController@eliminar_rolUsuario');
+
     Route::get('foros', 'OficinaController@foros');
     Route::get('obtener_foro/{foro}', 'OficinaController@obtener_foro');
     Route::post('registrar_foro', 'OficinaController@registrar_foro');
@@ -55,20 +55,18 @@ Route::post('forgot_password', 'UsuariosController@forgot_password');
     Route::put('configurar_foro/{foro}', 'OficinaController@configurar_foro');
     Route::put('activar_foro/{foro}', 'OficinaController@activar_foro');
     Route::post('agregar_foroDocente/{foro}', 'OficinaController@agregar_foroDocente');
-// });
+
+    Route::post('agregar_fechaForo/{foro}', 'HorarioController@agregar_fechaForo');
+    Route::get('obtener_fechaForo/{fecha}', 'HorarioController@obtener_fechaForo');
+    Route::put('actualizar_fechaForo/{fecha}', 'HorarioController@actualizar_fechaForo');
+    Route::delete('eliminar_fechaForo/{fecha}', 'HorarioController@eliminar_fechaForo');
+
+    Route::post('agregar_break/{fecha}', 'HorarioController@agregar_break');
+    Route::delete('eliminar_break/{break}', 'HorarioController@eliminar_break');
+});
 
 
 
-
-
-
-Route::post('agregar_fechaForo/{foro}', 'HorarioController@agregar_fechaForo');
-Route::get('obtener_fechaForo/{fecha}', 'HorarioController@obtener_fechaForo');
-Route::put('actualizar_fechaForo/{fecha}', 'HorarioController@actualizar_fechaForo');
-Route::delete('eliminar_fechaForo/{fecha}', 'HorarioController@eliminar_fechaForo');
-
-Route::post('agregar_break/{fecha}', 'HorarioController@agregar_break');
-Route::delete('eliminar_break/{break}', 'HorarioController@eliminar_break');
 
 Route::get('proyectos/{foro}', 'HorarioController@proyectos_foro');
 Route::get('jurado', 'HorarioController@jurado');
@@ -77,8 +75,8 @@ Route::delete('eliminar_jurado/{proyecto}', 'OficinaController@eliminar_jurado')
 Route::put('proyecto/{proyecto}', 'HorarioController@proyecto_participa');
 
 
-Route::post('agregar_horarioJurado_all/{docente}','HorarioController@agregar_horarioJurado_all');
-Route::delete('eliminar_horarioJurado_all/{docente}','HorarioController@eliminar_horarioJurado_all');
+Route::post('agregar_horarioJurado_all/{docente}', 'HorarioController@agregar_horarioJurado_all');
+Route::delete('eliminar_horarioJurado_all/{docente}', 'HorarioController@eliminar_horarioJurado_all');
 Route::post('agregar_horarioJurado/{docente}', 'HorarioController@agregar_horarioJurado');
 Route::delete('eliminar_horarioJurado/{docente}', 'HorarioController@eliminar_horarioJurado');
 
@@ -97,15 +95,20 @@ Route::put('cambiar_contrasena', 'UsuariosController@cambiar_contrasena')->middl
 
 //Alumno
 
-Route::get('foro_actual', 'AlumnoController@foro_actual');
-Route::get('lista_alumnos','AlumnoController@lista_alumnos');
-Route::get('misNotificaciones','UsuariosController@misNotificaciones');
-Route::get('miSolicitud','UsuariosController@miSolicitud');
-Route::put('responder_notificacion/{proyecto}','UsuariosController@responder_notificacion');
-Route::post('agregar_integrante/{proyecto}','AlumnoController@agregar_integrante');
-Route::delete('eliminar_integrante/{proyecto}','AlumnoController@eliminar_integrante');
 
 
 
-Route::get('notificaciones/{proyecto}','UsuariosController@notificaciones');
+
+
 // ->middleware('jwtAuth:Alumno');
+
+
+Route::group(['middleware' => ['jwtAuth:Alumno,Administrador,Docente']], function () {
+    Route::get('foro_actual', 'AlumnoController@foro_actual');
+    Route::get('lista_alumnos', 'AlumnoController@lista_alumnos');
+    Route::get('misNotificaciones', 'UsuariosController@misNotificaciones');    
+    Route::get('miSolicitud', 'UsuariosController@miSolicitud');
+    Route::put('responder_notificacion/{proyecto}', 'UsuariosController@responder_notificacion');
+    Route::post('agregar_integrante/{proyecto}', 'AlumnoController@agregar_integrante');
+    Route::delete('eliminar_integrante/{proyecto}', 'AlumnoController@eliminar_integrante');
+});

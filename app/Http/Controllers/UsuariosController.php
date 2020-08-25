@@ -2,14 +2,18 @@
 
 namespace App\Http\Controllers;
 
+use App\Foros;
 use JWTAuth;
 use App\Mail\ForgotPassword;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Http\Requests\CambiarPasswordRequest;
 use App\Notificaciones;
+use Carbon\Carbon;
 use App\User;
 use App\Proyectos;
+use App\TiposSolicitud;
+use Illuminate\Database\Eloquent\Builder;
 
 class UsuariosController extends Controller
 {
@@ -29,66 +33,94 @@ class UsuariosController extends Controller
         // Mail::to($request->email)->send(new ForgotPassword);
 
     }
-    public function misNotificaciones()
+    public function misNotificaciones(Request $request)
     {
-        $usuario = User::where('num_control', 15280701)->first();
-        $misNotificaciones = $usuario->misNotificaciones()->with('proyecto:id,titulo,folio')->get();
-        return response()->json($misNotificaciones, 200);
-        // dd($usuario->misNotificaciones()->get());
+        $usuario = JWTAuth::user();
+        $administradores = User::whereHas('roles', function (Builder $query) {
+            $query->where('roles.nombre_', 'Administrador');
+        })->get()->pluck('id')->toArray();
+        $hoy = Carbon::now()->toDateString();
+        $foro = Foros::where('acceso', true)->firstOrFail();
+        $notificaciones = Notificaciones::query();
+        if ($request->rol === 'Administrador') {
+            $misNotificaciones['data'] = $usuario->misNotificaciones()->whereHas('proyecto.foro', function (Builder $query) {
+                $query->where('acceso', true);
+            })->with(['proyecto:id,titulo,folio', 'tipo_solicitud', 'nuevo_asesor' => function ($query) {
+                $query->select('id', DB::raw("CONCAT(IFNULL(prefijo,''),' ',nombre,' ',apellidoP,' ',apellidoM) AS nombreCompleto"));
+            }])->where('respuesta', null)->where('administrador',1)->get();
+        } else {
+            $misNotificaciones['data'] = $usuario->misNotificaciones()->whereHas('proyecto.foro', function (Builder $query) {
+                $query->where('acceso', true);
+            })->with(['proyecto:id,titulo,folio', 'tipo_solicitud', 'nuevo_asesor' => function ($query) {
+                $query->select('id', DB::raw("CONCAT(IFNULL(prefijo,''),' ',nombre,' ',apellidoP,' ',apellidoM) AS nombreCompleto"));
+            }])->where('respuesta', null)->where('administrador',0)->get();
+        }
+        $misNotificaciones2 = $misNotificaciones['data']->unique()->values('receptor')->all();
 
+
+        // return response()->json($misNotificaciones, 200);
+        if ($hoy > $foro->fecha_limite)
+            $misNotificaciones['data'] = $misNotificaciones['data']->filter(function ($notificacion) use ($foro) {
+                return $notificacion->fecha > $foro->fecha_limite;
+            })->values();
+        $misNotificaciones['data'] = $misNotificaciones['data']->groupBy('solicitud');
+        $total = 0;
+        foreach ($misNotificaciones['data'] as $solicitud) {
+            foreach ($solicitud as $itemSolicitud) {
+                $total++;
+            }
+        }
+        $misNotificaciones['total'] = $total;
+        return response()->json($misNotificaciones, 200);
     }
     public function miSolicitud()
     {
-        $usuario = User::where('num_control', 'prueba')->firstOrFail();
-        $miSolicitud['data'] = $usuario->miSolicitud()        
-        ->with(['receptor' => function ($query) {
+        $usuario = JWTAuth::user();
+        // User::where('num_control', 'prueba')->firstOrFail();
+        $foro = Foros::where('acceso', true)->firstOrFail();
+        $hoy = Carbon::now()->toDateString();
+        $miSolicitud['data'] = $usuario->miSolicitud()->whereHas('proyecto.foro', function (Builder $query) {
+            $query->where('acceso', true);
+        })->with('tipo_solicitud', 'proyecto:id,titulo,folio')->with(['receptor' => function ($query) {
             $query->select('id', DB::raw("CONCAT(IFNULL(prefijo,''),' ',nombre,' ',apellidoP,' ',apellidoM) AS nombreCompleto"));
         }])->orderBy('respuesta', 'desc')->get();
-        $miSolicitud['proyecto'] = Proyectos::select('titulo','folio')->where('id',$miSolicitud['data'][0]->proyecto_id)->firstOrFail();
-        $aceptados = 0;
-        foreach ($miSolicitud['data'] as $item) {
-            if ($item->respuesta)
-                $aceptados++;
+
+
+        if ($hoy > $foro->fecha_limite)
+            $miSolicitud['data'] = $miSolicitud['data']->filter(function ($notificacion) use ($foro) {
+                return $notificacion->fecha > $foro->fecha_limite;
+            });
+        $miSolicitud['data'] = $miSolicitud['data']->groupBy('solicitud');
+        $miSolicitud['proyecto'] = $usuario->proyectos()->select('titulo', 'folio')->whereHas('foro', function (Builder $query) {
+            $query->where('acceso', true);
+        })->firstOrFail();
+
+        $miSolicitud['proyecto']->editar = $hoy > $foro->fecha_limite ? false : true;
+
+        foreach ($miSolicitud['data'] as $solicitud) {
+            $aceptados = 0;
+            foreach ($solicitud as $receptores) {
+                if ($receptores->respuesta)
+                    $aceptados++;
+            }
+            $solicitud[] = (object)$aceptados;
         }
-        $miSolicitud['aceptados'] = $aceptados;
         return response()->json($miSolicitud, 200);
     }
+
     public function responder_notificacion(Request $request, $folio)
     {
-        $usuario = User::where('num_control', '15280701')->firstOrFail();
+        $usuario = JWTAuth::user();
         $proyecto = Proyectos::where('folio', $folio)->firstOrFail();
+        $solicitud = TiposSolicitud::where('nombre_', $request->solicitud)->firstOrFail();
         $notificacion = $usuario->misNotificaciones()->where([
             ['proyecto_id', $proyecto->id],
-            ['receptor', $usuario->id]
+            ['receptor', $usuario->id],
+            ['tipo_solicitud', $solicitud->id]
         ])->firstOrFail();
         $notificacion->respuesta = $request->respuesta;
         $notificacion->save();
         $message = $request->respuesta ? 'Proyecto aceptado' : 'Proyecto rechazado';
         return response()->json(['mensaje' => $message], 200);
-    }
-    public function notificaciones($folio)
-    {
-        $proyecto = Proyectos::where('folio', $folio)->firstOrFail();
-        dd($proyecto->notificacion()->where('receptor', 1)->get());
-        // JWTAuth::user()->id
-        // $notificacion = Notificaciones::where
-        // $notificacion->respuesta = $request->response;
-        // $notificacion->save();
-        // $this->aceptarAsesor($notificacion);
-        // $this->aceptarAlumno($notificacion);
-        // $notificaciones_pendientes = Notificaciones::where('proyecto_id', $notificacion->proyecto_id)->where('respuesta', 0)->orWhere('respuesta', null)->count();
-        // $proyecto = new Proyectos();
-        // $proyecto = $notificacion->proyecto()->first();
-
-        // if ($notificaciones_pendientes == 0) {
-        //     $proyecto->aceptado = true;
-        // } else {
-        //     $proyecto->aceptado = false;
-        // }
-        // $proyecto->save();
-        // if ($notificacion->respuesta)
-        //     return back()->with('success', 'Proyecto aceptado.');
-        // else
-        //     return back()->with('error', 'Proyecto rechazado.');
     }
 }

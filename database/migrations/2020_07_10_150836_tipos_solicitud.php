@@ -14,8 +14,9 @@ class TiposSolicitud extends Migration
     public function up()
     {
         Schema::create('tipos_solicitud', function (Blueprint $table) {
-            $table->id();
-            $table->string('nombre');
+            // $table->id();
+            $table->increments('id');
+            $table->string('nombre_');
             // $table->timestamps();
         });
     }

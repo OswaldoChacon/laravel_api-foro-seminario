@@ -12,8 +12,10 @@ class TiposSolicitud extends Model
     protected $hidden = ['id'];
     protected $fillable = ['nombre_'];
 
+   
     public function notificacion()
     {
-        
     }
+
+   
 }

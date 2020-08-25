@@ -29,6 +29,7 @@ class Foros extends Migration
             $table->string('prefijo');            
             $table->unsignedInteger('user_id');
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');            
+            $table->date('fecha_limite');
         });
     }
 

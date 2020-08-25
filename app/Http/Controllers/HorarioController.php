@@ -77,22 +77,19 @@ class HorarioController extends Controller
     }
     public function proyectos_foro(Request $request, $slug)
     {        
-        $proyectosTable = Proyectos::query();
+        $proyectosTable = Proyectos::query();        
+        $aceptado = $request->filtro === 'Aceptados' ? true:false;
         $foro = Foros::Where('slug', $slug)->firstOrFail();
         if ($request->folio)
             $proyectosTable->where('folio', 'like', '%' . $request->folio . '%');
-
-
         $proyectos = $proyectosTable->with(['jurado' => function ($query) {
             $query->select('num_control');
-        }])->where('aceptado', 1)->paginate(7);        
-        // $proyectos = $foro->proyectos()->select('id', 'folio', 'titulo', 'participa')->with(['jurado' => function ($query) {
-        //     $query->select('num_control');
-        // }])->where('aceptado', 1)->paginate(8);
+        }])->where('aceptado', $aceptado)->paginate(7);                
 
         $docentes = User::select('num_control', DB::raw("CONCAT(prefijo,' ',nombre,' ',apellidoP,' ',apellidoM) AS nombre"))->whereHas('roles', function ($query) {
             $query->where('roles.nombre_', 'Docente');
         })->get();
+        
         foreach ($docentes as $docente) {
             $docente['jurado'] = false;
         }

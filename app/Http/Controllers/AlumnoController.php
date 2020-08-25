@@ -162,4 +162,9 @@ class AlumnoController extends Controller
         $this->authorize($user);
         $user->save();
     }
+
+    public function registrar_solicitud(Request $request)
+    {
+
+    }
 }

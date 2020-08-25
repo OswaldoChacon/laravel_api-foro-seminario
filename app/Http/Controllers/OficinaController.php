@@ -89,7 +89,7 @@ class OficinaController extends Controller
     }    
 
     public function usuarios(Request $request)
-    {
+    {    
         $usersTable = User::query();
         if ($request->rol !== 'Todos')
             $usersTable->whereHas('roles', function ($query) use ($request) {
@@ -255,7 +255,7 @@ class OficinaController extends Controller
     {
         $foro = Foros::with('fechas')->where('slug', $slug)->firstOrFail();
         if (!$foro->acceso)
-            return response()->json(['message' => 'Foro no activo'], 401);
+            return response()->json(['message' => 'Foro no activo'], 422);
         $posicionET = 0;
         foreach ($foro->fechas as $fecha) {
             $recesos = $fecha->receso()->select('posicion')->get()->pluck('posicion')->toArray();
