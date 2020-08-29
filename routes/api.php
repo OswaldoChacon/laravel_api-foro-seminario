@@ -82,6 +82,8 @@ Route::delete('eliminar_horarioJurado/{docente}', 'HorarioController@eliminar_ho
 
 
 Route::post('registrar_proyecto', 'AlumnoController@registrar_proyecto');
+
+
 // ->middleware('jwtAuth:Alumno');
 Route::put('actualizar_info/{usuario}', 'AlumnoController@actualizar_info');
 Route::put('cambiar_contrasena', 'UsuariosController@cambiar_contrasena')->middleware('jwtAuth:Alumno,Docente,Administrador');
@@ -94,7 +96,10 @@ Route::put('cambiar_contrasena', 'UsuariosController@cambiar_contrasena')->middl
 
 
 //Alumno
-
+Route::group(['middleware'=>['jwtAuth:Alumno']],function(){
+    Route::get('registrar_solicitud', 'AlumnoController@get_registrar_solicitud');
+    Route::post('registrar_solicitud','AlumnoController@registrar_solicitud');
+});
 
 
 
@@ -104,6 +109,10 @@ Route::put('cambiar_contrasena', 'UsuariosController@cambiar_contrasena')->middl
 
 
 Route::group(['middleware' => ['jwtAuth:Alumno,Administrador,Docente']], function () {
+
+
+    // Route::get('solicitudes', 'OficinaController@solicitudes');
+
     Route::get('foro_actual', 'AlumnoController@foro_actual');
     Route::get('lista_alumnos', 'AlumnoController@lista_alumnos');
     Route::get('misNotificaciones', 'UsuariosController@misNotificaciones');    

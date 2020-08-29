@@ -148,8 +148,10 @@ class HorarioController extends Controller
         // $jurado->paginate(7);
 
 
-        $jurado = User::select('id', 'num_control', DB::raw("CONCAT(prefijo,' ',nombre,' ',apellidoP,' ',apellidoM) AS nombreCompleto")) //->with('horarios')->get()->pluck('horarios.posicion')->toArray();
-            ->whereHas('jurado_proyecto.foro', function ($query) {
+        $jurado = User::
+        // select('id', 'num_control', DB::raw("CONCAT(prefijo,' ',nombre,' ',apellidoP,' ',apellidoM) AS nombreCompleto")) //->with('horarios')->get()->pluck('horarios.posicion')->toArray();
+            // ->
+            whereHas('jurado_proyecto.foro', function ($query) {
                 $query->where('participa', 1)->where('acceso', 1);
             })->with('horarios:docente_id,posicion')->withCount('horarios')            
             ->paginate(7);

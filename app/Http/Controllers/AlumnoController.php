@@ -3,16 +3,19 @@
 namespace App\Http\Controllers;
 
 use JWTAuth;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Database\Eloquent\Builder;
-use App\Http\Requests\ProyectoRequest;
-use Illuminate\Http\Request;
-use App\Proyectos;
+use App\User;
 use App\Foros;
-use App\LineasDeInvestigacion;
+use App\Proyectos;
+use Carbon\Carbon;
 use App\Notificaciones;
 use App\TiposProyectos;
-use App\User;
+use App\TiposSolicitud;
+use Illuminate\Http\Request;
+use App\LineasDeInvestigacion;
+use Illuminate\Support\Facades\DB;
+use App\Http\Requests\ProyectoRequest;
+use App\Http\Requests\SolicitudRequest;
+use Illuminate\Database\Eloquent\Builder;
 
 class AlumnoController extends Controller
 {
@@ -27,6 +30,8 @@ class AlumnoController extends Controller
         if (!JWTAuth::user()->hasProject())
             return response()->json(['message' => 'Tienes un proyecto en curso'], 400);
         $foro = Foros::select('no_foro', 'nombre', 'periodo', 'anio', 'lim_alumnos')->where('acceso', true)->first();
+        if(is_null($foro))
+            return response()->json(['message' => 'No hay ningún foro en curso'], 400);
         $foro->lim_alumnos -= 1;
         $lineas = LineasDeInvestigacion::all();
         $tipos_proyectos = TiposProyectos::all();
@@ -41,10 +46,16 @@ class AlumnoController extends Controller
     public function lista_alumnos()
     {
         $usuario = User::where('num_control', 'prueba')->firstOrFail();
+        $foro = Foros::where('acceso',true)->first();
+        $hoy = Carbon::now()->toDateString();
         $miProyecto = $usuario->proyectos()->whereHas('foro', function (Builder $query) {
             $query->where('acceso', true);
         })->firstOrFail();
         $miEquipo = $miProyecto->integrantes()->where('user_id', '!=', $usuario->id)->get();
+        if($hoy > $foro->fecha_limite)                    
+            return response()->json($miEquipo, 200);        
+      
+        
         // return response()->json($miEquipo, 200);
         // $alumnos = User::select('num_control', DB::raw("CONCAT(nombre,' ',apellidoP) AS nombre"))->whereHas('roles', function ($query) {
         //     $query->where('roles.nombre', 'Alumno');
@@ -52,10 +63,10 @@ class AlumnoController extends Controller
         $alumnos = User::select('num_control', DB::raw("CONCAT(nombre,' ',apellidoP) AS nombre"))->whereHas('roles', function ($query) {
             $query->where('roles.nombre_', 'Alumno');
         })->where('num_control', '!=', $usuario->num_control)->get();
-        foreach ($alumnos as $alumno) {            
-            $alumno->myTeam = $miEquipo->contains('num_control',$alumno->num_control);
+        foreach ($alumnos as $alumno) {
+            $alumno->myTeam = $miEquipo->contains('num_control', $alumno->num_control);
         }
-        $alumnosOrdenados = $alumnos->sortByDesc('myTeam')->values();        
+        $alumnosOrdenados = $alumnos->sortByDesc('myTeam')->values();
         $alumnosOrdenados->all();
         // })->doesntHave('proyectos')->where('num_control','!=',JWTAuth::user()->num_control)->get();
         return response()->json($alumnosOrdenados, 200);
@@ -63,6 +74,7 @@ class AlumnoController extends Controller
     public function registrar_proyecto(ProyectoRequest $request)
     {
         $user = JWTAuth::user();
+        $solicitud = TiposSolicitud::where('nombre_', 'Registro de proyecto')->firstOrFail();
         if (!JWTAuth::user()->hasProject())
             return response()->json(['message' => 'Tienes un proyecto en curso'], 400);
         $foro = Foros::where('acceso', true)->firstOrFail();
@@ -99,6 +111,7 @@ class AlumnoController extends Controller
             $notificacion->emisor = JWTAuth::user()->id;
             $notificacion->receptor = $usuario->id;
             $notificacion->proyecto_id = $proyecto->id;
+            $notificacion->tipo_solicitud = $solicitud->id;
             $notificacion->save();
             if ($usuario->id != $proyecto->asesor)
                 $usuario->proyectos()->attach($proyecto);
@@ -108,21 +121,21 @@ class AlumnoController extends Controller
 
     public function agregar_integrante(Request $request, $folio)
     {
-        $usuarioLogueado = User::where('num_control','prueba')->firstOrFail();
+        $usuarioLogueado = User::where('num_control', 'prueba')->firstOrFail();
         $proyecto = Proyectos::where('folio', $folio)->firstOrFail();
         $foro = $proyecto->foro()->firstOrFail();
         if ($proyecto->integrantes()->count() >= $foro->lim_alumnos)
-        return response()->json(['message' => 'No puedes agregar más integrantes al proyecto'], 400);
-        $nuevo_integrante = User::where('num_control', $request->num_control)->firstOrFail();        
+            return response()->json(['message' => 'No puedes agregar más integrantes al proyecto'], 400);
+        $nuevo_integrante = User::where('num_control', $request->num_control)->firstOrFail();
         $nuevo_integrante->proyectos()->attach($proyecto);
         $notificacion = new Notificaciones();
         $notificacion->emisor = $usuarioLogueado->id;
         $notificacion->receptor = $nuevo_integrante->id;
         $notificacion->proyecto_id = $proyecto->id;
-        $notificacion->save();        
+        $notificacion->save();
         $asesor = $usuarioLogueado->miSolicitud()->where([
-            ['proyecto_id',$proyecto->id],
-            ['receptor',$proyecto->asesor]
+            ['proyecto_id', $proyecto->id],
+            ['receptor', $proyecto->asesor]
         ])->firstOrFail();
         $asesor->respuesta = 0;
         $asesor->save();
@@ -132,13 +145,13 @@ class AlumnoController extends Controller
     public function eliminar_integrante(Request $request, $folio)
     {
         $proyecto = Proyectos::where('folio', $folio)->firstOrFail();
-        $usuario = User::where('num_control','prueba')->firstOrFail();
-        $integrante_eliminar = User::where('num_control', $request->num_control)->firstOrFail();        
+        $usuario = User::where('num_control', 'prueba')->firstOrFail();
+        $integrante_eliminar = User::where('num_control', $request->num_control)->firstOrFail();
         $integrante_eliminar->proyectos()->detach($proyecto);
-        $integrante_eliminar->misNotificaciones()->where('proyecto_id',$proyecto->id)->firstOrFail()->delete();
+        $integrante_eliminar->misNotificaciones()->where('proyecto_id', $proyecto->id)->firstOrFail()->delete();
         $asesor = $usuario->miSolicitud()->where([
-            ['proyecto_id',$proyecto->id],
-            ['receptor',$proyecto->asesor]
+            ['proyecto_id', $proyecto->id],
+            ['receptor', $proyecto->asesor]
         ])->firstOrFail();
         $asesor->respuesta = 0;
         $asesor->save();
@@ -163,8 +176,102 @@ class AlumnoController extends Controller
         $user->save();
     }
 
-    public function registrar_solicitud(Request $request)
+    public function get_registrar_solicitud(Request $request)
     {
+        $usuario = JWTAuth::user();
+        $proyectoEnCurso = $usuario->proyectoActual();
+        if ($proyectoEnCurso->isEmpty())
+            return response()->json(['message' => 'No tienes ningun proyecto en curso'], 404);
+        $solicitudes = TiposSolicitud::where('nombre_', '!=', 'REGISTRO DE PROYECTO')->get();
+        $docentes = User::whereHas('roles', function ($query) {
+            // select('num_control')->
+            $query->where('nombre_', 'Docente');
+        })->get();
 
+
+        $docentes = $docentes->filter(function ($docente) use ($proyectoEnCurso) {
+            return $docente->id !== $proyectoEnCurso->first()->asesor;
+        })->values();
+        return response()->json(['solicitudes' => $solicitudes, 'docentes' => $docentes, 'proyecto' => $proyectoEnCurso->first()], 200);
+    }
+    public function registrar_solicitud(SolicitudRequest $request)
+    {
+        $usuario = JWTAuth::user();
+        $proyectoEnCurso = $usuario->proyectoActual();
+        $administrador = User::whereHas('roles', function (Builder $query) {
+            $query->where('nombre_', 'Administrador');
+        })->firstOrFail();
+
+        $solicitudesPendientes = $usuario->miSolicitud()->whereHas('tipo_solicitud',function (Builder $query) use ($request) {
+            $query->where('nombre_', $request->tipo_solicitud);
+        })->where('respuesta', null)->count();
+        if ($solicitudesPendientes > 0)
+            return response()->json(['message' => 'Solicitud pendiente'], 400);
+        
+        // return response()->json($solicitudesPendientes, 200);
+
+        $integrantes = $proyectoEnCurso->first()->integrantes()->where('user_id', '!=', $usuario->id)->get()->pluck('id')->toArray();
+
+        array_push($integrantes, $proyectoEnCurso->first()->asesor);
+        // array_push($integrantes,$administrador->id);
+
+        $solicitud = TiposSolicitud::where('nombre_', $request->tipo_solicitud)->firstOrFail();
+
+        $nuevo_titulo = null;
+        $titulo_anterior = null;
+        $nuevo_asesor = null;
+        $anterior_asesor = null;
+        switch ($solicitud->nombre_) {
+            case 'CANCELACION DEL PROYECTO':
+                break;
+            case 'CAMBIO DE TITULO DEL PROYECTO':
+                $request->validate(['nuevo_titulo' => 'required']);
+                $nuevo_titulo = $request->nuevo_titulo;
+                break;
+            case 'DAR DE BAJA A UN INTEGRANTE':
+                break;
+            case 'CAMBIO DE ASESOR':
+                $request->validate(['nuevo_asesor' => 'required|exists:users,num_control']);
+                $nuevo_asesor = User::where('num_control', $request->nuevo_asesor)->firstOrFail()->id;                
+                break;
+        }
+        $notificaciones = [];
+        // return response()->json($notificaciones, 200);
+        foreach ($integrantes as $integrante) {
+            $notificaciones[] = [
+                'emisor' => $usuario->id,
+                'receptor' => $integrante,
+                'administrador' => 0,
+                'proyecto_id' => $proyectoEnCurso->first()->id,
+                'tipo_solicitud' => $solicitud->id,
+                'nuevo_asesor' => $nuevo_asesor,
+                'nuevo_titulo' => $nuevo_titulo,
+                'motivo' => $request->motivo,
+                'fecha' => Carbon::now()->toDateString()
+            ];
+        }
+        $notificaciones[] = [
+            'emisor' => $usuario->id,
+            'receptor' => $administrador->id,
+            'administrador' => 1,
+            'proyecto_id' => $proyectoEnCurso->first()->id,
+            'tipo_solicitud' => $solicitud->id,
+            'nuevo_asesor' => $nuevo_asesor,
+            'nuevo_titulo' => $request->nuevo_titulo,
+            'motivo' => $request->motivo,
+            'fecha' => Carbon::now()->toDateString()
+        ];
+
+        Notificaciones::insert($notificaciones);
+        // return response()->json($notificaciones, 200);
+        // $notificacion = new Notificaciones();
+
+        // $notificacion->emisor = $usuario->id;
+        // $notificacion->receptor = $proyectoEnCurso->first()->asesor;
+        // $notificacion->proyecto_id = $proyectoEnCurso->first()->id;
+        // $notificacion->tipo_solicitud = $solicitud->id;
+        // $notificacion->motivo = $request->motivo;
+        // $notificacion->save();
+        return response()->json(['message' => 'Solicitud registrada'], 200);
     }
 }

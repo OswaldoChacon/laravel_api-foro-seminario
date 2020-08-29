@@ -13,11 +13,18 @@ use Carbon\Carbon;
 use App\User;
 use App\Proyectos;
 use App\TiposSolicitud;
+use App\Roles;
 use Illuminate\Database\Eloquent\Builder;
 
 class UsuariosController extends Controller
 {
     //
+    public function roles(Request $request)
+    {
+        $roles = Roles::all();
+        // $roles[sizeof($roles)] = array('nombre' => 'Todos');
+        return response()->json($roles, 200);
+    }
     public function cambiar_contrasena(CambiarPasswordRequest $request)
     {
         $usuarioLogueado = JWTAuth::user();
@@ -36,11 +43,14 @@ class UsuariosController extends Controller
     public function misNotificaciones(Request $request)
     {
         $usuario = JWTAuth::user();
+        $foro = Foros::where('acceso', true)->first();
+        if(is_null($foro))
+            return response()->json(['mensaje'=>'No hay ningun foro activo'],200);
         $administradores = User::whereHas('roles', function (Builder $query) {
             $query->where('roles.nombre_', 'Administrador');
         })->get()->pluck('id')->toArray();
         $hoy = Carbon::now()->toDateString();
-        $foro = Foros::where('acceso', true)->firstOrFail();
+        // $foro = Foros::where('acceso', true)->firstOrFail();
         $notificaciones = Notificaciones::query();
         if ($request->rol === 'Administrador') {
             $misNotificaciones['data'] = $usuario->misNotificaciones()->whereHas('proyecto.foro', function (Builder $query) {
@@ -75,15 +85,16 @@ class UsuariosController extends Controller
     }
     public function miSolicitud()
     {
-        $usuario = JWTAuth::user();
-        // User::where('num_control', 'prueba')->firstOrFail();
-        $foro = Foros::where('acceso', true)->firstOrFail();
+        $usuario = JWTAuth::user();        
+        $foro = Foros::where('acceso', true)->first();        
+        if(is_null($foro))
+            // return response()->noContent();
+            return response()->json(['mensaje'=>'No hay ningun foro activo'],200);
+
         $hoy = Carbon::now()->toDateString();
         $miSolicitud['data'] = $usuario->miSolicitud()->whereHas('proyecto.foro', function (Builder $query) {
             $query->where('acceso', true);
-        })->with('tipo_solicitud', 'proyecto:id,titulo,folio')->with(['receptor' => function ($query) {
-            $query->select('id', DB::raw("CONCAT(IFNULL(prefijo,''),' ',nombre,' ',apellidoP,' ',apellidoM) AS nombreCompleto"));
-        }])->orderBy('respuesta', 'desc')->get();
+        })->with('tipo_solicitud', 'proyecto:id,titulo,folio')->with(['receptor'])->orderBy('respuesta', 'desc')->get();
 
 
         if ($hoy > $foro->fecha_limite)
@@ -91,10 +102,12 @@ class UsuariosController extends Controller
                 return $notificacion->fecha > $foro->fecha_limite;
             });
         $miSolicitud['data'] = $miSolicitud['data']->groupBy('solicitud');
-        $miSolicitud['proyecto'] = $usuario->proyectos()->select('titulo', 'folio')->whereHas('foro', function (Builder $query) {
-            $query->where('acceso', true);
-        })->firstOrFail();
 
+        // ->select('proyectos.id','titulo', 'folio')
+        $miSolicitud['proyecto'] = $usuario->proyectos()->with(['lineadeinvestigacion:id,nombre','tipos_proyectos:id,nombre','asesora'])->whereHas('foro', function (Builder $query) {
+            $query->where('acceso', true);
+        })->first();                             
+        
         $miSolicitud['proyecto']->editar = $hoy > $foro->fecha_limite ? false : true;
 
         foreach ($miSolicitud['data'] as $solicitud) {

@@ -39,7 +39,7 @@ class Proyectos extends Model
     }
     public function integrantes()
     {
-        return $this->BelongsToMany(User::class);
+        return $this->belongsToMany(User::class);
     }
     public function folio(Foros $foro)
     {
