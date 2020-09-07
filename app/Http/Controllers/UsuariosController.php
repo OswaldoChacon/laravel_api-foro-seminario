@@ -40,56 +40,109 @@ class UsuariosController extends Controller
         // Mail::to($request->email)->send(new ForgotPassword);
 
     }
-    public function misNotificaciones(Request $request)
+
+    public function misForos(Request $request)
     {
         $usuario = JWTAuth::user();
+        if ($request->rol === 'Alumno')
+            $misForos = $usuario->proyectos()->with('foro')->get()->pluck('foro');
+        if ($request->rol === 'Docente')
+            $misForos = $usuario->asesor()->with('foro')->get()->pluck('foro');
+        if ($request->rol === 'Administrador')
+            $misForos = Foros::where('user_id', $usuario->id)->get();
+        $misForos = $misForos->map(function ($foro) {
+            if ($foro->acceso === 1)
+                return 'Foro en curso';
+            return 'Foro ' . $foro->no_foro;
+        });
+        return response()->json($misForos, 200);
+    }
+    public function misNotificaciones(Request $request)
+    {
+        $respuesta = $request->respuesta == 'Aceptados' ? true : ($request->respuesta == 'Rechazados' ? false : null);
+        // $enviado = $request->enviados == 'Recibidos' ? true: false;
+
+        $notificacionesQuery = Notificaciones::query();
+        $usuario = JWTAuth::user();
+        $notificacionesQuery = $usuario->misNotificaciones();
         $foro = Foros::where('acceso', true)->first();
-        if(is_null($foro))
-            return response()->json(['mensaje'=>'No hay ningun foro activo'],200);
-        $administradores = User::whereHas('roles', function (Builder $query) {
-            $query->where('roles.nombre_', 'Administrador');
-        })->get()->pluck('id')->toArray();
-        $hoy = Carbon::now()->toDateString();
-        // $foro = Foros::where('acceso', true)->firstOrFail();
-        $notificaciones = Notificaciones::query();
-        if ($request->rol === 'Administrador') {
-            $misNotificaciones['data'] = $usuario->misNotificaciones()->whereHas('proyecto.foro', function (Builder $query) {
+        if ($request->no_foro === 'Foro en curso') {
+            if (is_null($foro))
+                return response()->json(['data' => []], 200);
+            $notificacionesQuery->whereHas('proyecto.foro', function (Builder $query) {
                 $query->where('acceso', true);
-            })->with(['proyecto:id,titulo,folio', 'tipo_solicitud', 'nuevo_asesor' => function ($query) {
-                $query->select('id', DB::raw("CONCAT(IFNULL(prefijo,''),' ',nombre,' ',apellidoP,' ',apellidoM) AS nombreCompleto"));
-            }])->where('respuesta', null)->where('administrador',1)->get();
+            });
         } else {
-            $misNotificaciones['data'] = $usuario->misNotificaciones()->whereHas('proyecto.foro', function (Builder $query) {
-                $query->where('acceso', true);
-            })->with(['proyecto:id,titulo,folio', 'tipo_solicitud', 'nuevo_asesor' => function ($query) {
-                $query->select('id', DB::raw("CONCAT(IFNULL(prefijo,''),' ',nombre,' ',apellidoP,' ',apellidoM) AS nombreCompleto"));
-            }])->where('respuesta', null)->where('administrador',0)->get();
+            $notificacionesQuery->whereHas('proyecto.foro', function (Builder $query) use ($request) {
+                $query->where('no_foro', $request->no_foro);
+            });
         }
-        $misNotificaciones2 = $misNotificaciones['data']->unique()->values('receptor')->all();
+        if (is_null($foro))
+            return response()->json(['mensaje' => 'No hay ningun foro activo'], 200);
+
+        // $administradores = User::whereHas('roles', function (Builder $query) {
+        //     $query->where('roles.nombre_', 'Administrador');
+        // })->get()->pluck('id')->toArray();
+
+        $hoy = Carbon::now()->toDateString();
+
+        $notificacionesQuery->with(['proyecto:id,titulo,folio', 'tipo_solicitud', 'nuevo_asesor:id,prefijo,nombre,apellidoP,apellidoM'])->where('respuesta', $respuesta);
+        if ($request->rol === 'Administrador') {
+            // $misNotificaciones['data'] = $notificacionesQuery->where('administrador', 1)->get();
+            $notificacionesQuery->where('administrador', 1);
+        } else if ($request->rol === 'Docente') {
+            // $misNotificaciones['data'] = $notificacionesQuery->where('administrador', 0)->get();
+            $notificacionesQuery->where('administrador', 0)->whereHas('proyecto', function (Builder $query) {
+                $query->where('enviado', true);
+            });
+        } else if ($request->rol === 'Alumno') {
+            $notificacionesQuery->where('administrador', 0);
+        }
+        // $notificacionesQuery->whereHas('proyecto',function(Builder $query)  {
+        //     $query->where('enviado',true);
+        //     $query->where('enviado',$enviado);
+        // })
+        $misNotificaciones['data'] = $notificacionesQuery->get();
 
 
-        // return response()->json($misNotificaciones, 200);
         if ($hoy > $foro->fecha_limite)
             $misNotificaciones['data'] = $misNotificaciones['data']->filter(function ($notificacion) use ($foro) {
                 return $notificacion->fecha > $foro->fecha_limite;
             })->values();
         $misNotificaciones['data'] = $misNotificaciones['data']->groupBy('solicitud');
+        // foreach
         $total = 0;
-        foreach ($misNotificaciones['data'] as $solicitud) {
+        // if ($request->respuesta === 'Pendientes') {
+        foreach ($misNotificaciones['data'] as $key => $solicitud) {
+            // la llave
             foreach ($solicitud as $itemSolicitud) {
+                // dd($itemSolicitud);
+                if ($request->rol === 'Alumno') {
+                    if ($key === 'REGISTRO DE PROYECTO') {
+                        $proyecto = $itemSolicitud->proyecto()->firstOrFail();
+                        $itemSolicitud->editar = !$proyecto->enviado;
+                    }
+                    $itemSolicitud->editar = $itemSolicitud->respuesta != null ? false : true;
+                }
                 $total++;
             }
         }
+        // }
         $misNotificaciones['total'] = $total;
         return response()->json($misNotificaciones, 200);
     }
     public function miSolicitud()
     {
-        $usuario = JWTAuth::user();        
-        $foro = Foros::where('acceso', true)->first();        
-        if(is_null($foro))
-            // return response()->noContent();
-            return response()->json(['mensaje'=>'No hay ningun foro activo'],200);
+        $usuario = JWTAuth::user();
+        $foro = Foros::where('acceso', true)->first();
+        if (is_null($foro))
+            return response()->json(['mensaje' => 'No hay ningun foro activo'], 200);
+
+        $miSolicitud['proyecto'] = $usuario->proyectos()->with(['lineadeinvestigacion', 'tipos_proyectos', 'asesora'])->whereHas('foro', function (Builder $query) {
+            $query->where('acceso', true);
+        })->first();
+        if (is_null($miSolicitud['proyecto']))
+            return response()->json(['mensaje' => 'No tienes ningún proyecto registrado al foro en curso'], 200);
 
         $hoy = Carbon::now()->toDateString();
         $miSolicitud['data'] = $usuario->miSolicitud()->whereHas('proyecto.foro', function (Builder $query) {
@@ -97,18 +150,23 @@ class UsuariosController extends Controller
         })->with('tipo_solicitud', 'proyecto:id,titulo,folio')->with(['receptor'])->orderBy('respuesta', 'desc')->get();
 
 
-        if ($hoy > $foro->fecha_limite)
+        if ($hoy > $foro->fecha_limite) {
             $miSolicitud['data'] = $miSolicitud['data']->filter(function ($notificacion) use ($foro) {
                 return $notificacion->fecha > $foro->fecha_limite;
             });
+            $miSolicitud['proyecto']->enviar = false;
+            $miSolicitud['proyecto']->editar = false;
+        }
         $miSolicitud['data'] = $miSolicitud['data']->groupBy('solicitud');
 
-        // ->select('proyectos.id','titulo', 'folio')
-        $miSolicitud['proyecto'] = $usuario->proyectos()->with(['lineadeinvestigacion:id,nombre','tipos_proyectos:id,nombre','asesora'])->whereHas('foro', function (Builder $query) {
-            $query->where('acceso', true);
-        })->first();                             
-        
-        $miSolicitud['proyecto']->editar = $hoy > $foro->fecha_limite ? false : true;
+
+        $miSolicitud['proyecto']->editar = $miSolicitud['proyecto']->editarDatos();
+        $miSolicitud['proyecto']->enviar =
+            $miSolicitud['proyecto']->enviarSolicitud();
+        // true;
+        // $miSolicitud['proyecto']->enviar = false;
+        //     $miSolicitud['proyecto']->editar = false;
+
 
         foreach ($miSolicitud['data'] as $solicitud) {
             $aceptados = 0;
@@ -133,6 +191,11 @@ class UsuariosController extends Controller
         ])->firstOrFail();
         $notificacion->respuesta = $request->respuesta;
         $notificacion->save();
+        if ($usuario->hasRole('Docente') && $notificacion->respuesta === false) {
+            $proyecto->enviado = 0;
+            $proyecto->save();
+        }
+
         $message = $request->respuesta ? 'Proyecto aceptado' : 'Proyecto rechazado';
         return response()->json(['mensaje' => $message], 200);
     }

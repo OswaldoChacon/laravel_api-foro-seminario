@@ -56,7 +56,7 @@ class Notificaciones extends Model
     // }
     public function emisor()
     {
-        return $this->belongsTo('App\User','emisor');
+        return $this->belongsTo(User::class,'emisor');
     }
     public function receptor()
     {

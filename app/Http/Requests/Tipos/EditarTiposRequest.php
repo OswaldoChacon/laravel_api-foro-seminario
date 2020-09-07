@@ -28,7 +28,7 @@ class EditarTiposRequest extends FormRequest
      */
     public function rules()
     {
-        $tipos = TiposProyectos::Where('clave',$this->tipo)->firstOrFail();
+        $tipos = TiposProyectos::Where('clave',$this->tiposProyecto)->firstOrFail();
         return [
             'clave' => 'required|unique:tipos_de_proyectos,clave,'.$tipos->id,
             'nombre' => 'required|unique:tipos_de_proyectos,nombre,' .$tipos->id

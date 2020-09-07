@@ -19,7 +19,7 @@ class AuthController extends Controller
                 'message' => 'Correo o contraseña no válidos.',
             ], 404);
         }
-        $user = User::Where('num_control',$request->num_control)->firstOrFail();
+        $user = User::Buscar($request->num_control)->firstOrFail();
         $user->nombreCompleto = $user->getNombre();
         if(!$user->hasAnyRole($user->roles())){
             return response()->json(['titulo'=>'Acceso denegado','message'=>'No tiene ningún rol asignado'], 403);  

@@ -24,7 +24,7 @@ class EditarForoRequest extends FormRequest
      */
     public function rules()
     {
-        $foro = Foros::Where('slug',$this->foro)->firstOrFail();
+        $foro = Foros::Buscar($this->foro)->firstOrFail();
         return [
             //
             'no_foro' => 'required|numeric|unique:foros,no_foro,'.$foro->id,

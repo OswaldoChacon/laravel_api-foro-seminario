@@ -15,6 +15,6 @@ class TiposProyectos extends Model
     protected $hidden = ['id'];
     public function proyectos()
     {
-        return $this->hasMany('App\Proyectos');
+        return $this->hasMany(Proyectos::class);
     }
 }

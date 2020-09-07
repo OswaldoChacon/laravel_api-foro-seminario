@@ -33,7 +33,7 @@ class EditarUsuarioRequest extends FormRequest
         
         // dd($this->input('num_control'));
         // dd(json_decode($this->usuario));
-        $user = User::Where('num_control',$this->usuario)->firstOrFail();             
+        $user = User::Buscar($this->usuario)->firstOrFail();             
         // dd($user);
         return [
             //

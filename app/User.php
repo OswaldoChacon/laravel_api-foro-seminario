@@ -137,7 +137,8 @@ class User extends Authenticatable implements JWTSubject
             $query->where('acceso', true);
         })->with(['asesora' => function ($query) {
             // $query->select('id', DB::raw("CONCAT(IFNULL(prefijo,''),' ',nombre,' ',apellidoP,' ',apellidoM) AS nombreCompleto"));
-        }])->get();
+        }])->firstOrFail();
+        // first()
     }
 
     public function hasProject()
@@ -148,7 +149,7 @@ class User extends Authenticatable implements JWTSubject
             $query->where('acceso', true);
         })->whereHas('roles', function (Builder $query) {
             $query->where('roles.nombre_', 'Alumno');
-        })->where('num_control', $this->num_control)->count() > 0)
+        })->Buscar($this->num_control)->count() > 0)
             return false;
         return true;
     }
@@ -185,5 +186,14 @@ class User extends Authenticatable implements JWTSubject
         ];
         Mail::to($this->email)->send(new EmailConfirmacion($data));
         $this->password = bcrypt($this->password);
+    }
+
+    public function scopeDatosBasicos($query)
+    {
+        return $query->select('num_control','prefijo','nombre','apellidoP','apellidoM');
+    }
+    public function scopeBuscar($query, $num_control)
+    {
+        return $query->where('num_control', $num_control);
     }
 }
