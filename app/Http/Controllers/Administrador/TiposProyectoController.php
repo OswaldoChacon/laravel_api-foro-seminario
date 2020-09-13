@@ -53,7 +53,7 @@ class TiposProyectoController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(EditarTiposRequest $request, $clave)
+    public function update(RegistrarTiposRequest $request, $clave)
     {
         $tipo = TiposProyectos::where('clave', $clave)->firstOrFail();
         $tipo->fill($request->all())->save();

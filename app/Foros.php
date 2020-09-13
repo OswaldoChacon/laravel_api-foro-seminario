@@ -11,7 +11,13 @@ class Foros extends Model
     protected $fillable = [
         'no_foro', 'nombre', 'periodo', 'anio'
     ];
-    protected $hidden = ['id'];
+    protected $hidden = ['id','user_id','users'];
+    // protected $appends = ['maestros'];
+
+    // public function getMaestrosAttribute()
+    // {        
+    //     return $this->users()->get();
+    // }
 
     public function user()
     {
@@ -19,7 +25,7 @@ class Foros extends Model
     }
     public function users()
     {
-        return $this->belongsToMany(User::class);
+        return $this->belongsToMany(User::class,'foros_user');
     }
     public function proyectos()
     {

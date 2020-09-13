@@ -14,7 +14,7 @@ class Proyectos extends Model
         'titulo', 'empresa', 'objetivo', 'asesor'
     ];
     protected $hidden = ['id', 'lineadeinvestigacion_id', 'tipos_proyectos_id', 'foros_id', 'asesor', 'pivot'];
-    
+
     public function asesora()
     {
         return $this->belongsTo(User::class, 'asesor');
@@ -60,17 +60,37 @@ class Proyectos extends Model
     }
 
     public function editarDatos()
-    {
-        return !$this->enviado;
+    {        
+        if($this->aceptado && $this->permitir_cambios)
+            return true;
+        if(!$this->enviado && !$this->aceptado)
+            return true;        
+        return false;        
     }
 
     public function enviarSolicitud()
     {
+        if($this->aceptado)
+            return false;
         if ($this->enviado)
             return false;
         return ($this->integrantes()->count()) === $this->notificacion()->whereHas('receptor.roles', function (Builder $query) {
             $query->where('nombre_', 'Alumno');
         })->where('respuesta', true)->count();
+    }
+
+    public function cancelarSolicitud()
+    {
+        // aqui la pregunta, que pasa si el asesor rechaza
+        // lo correcto sería que el enviado sea 0 el campo asesor quede igual
+        if ($this->aceptado)
+            return false;
+        if($this->enviado)
+            return true;
+        return false;
+        // if($this->notificacion()->whereHas('receptor.roles', function (Builder $query) {
+        //         $query->where('nombre_', 'Docente');
+
     }
 
     public function contarNotificaciones()

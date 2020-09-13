@@ -20,8 +20,9 @@ class CreateUsersTable extends Migration
             $table->string('apellidoM')->nullable();
             $table->string('prefijo')->nullable();
             $table->string('email')->unique();
-            $table->string('password')->nullable();
+            $table->string('password'); //->nullable();
             $table->string('num_control')->unique();
+            $table->string('grupo')->nullable();
             $table->string('cod_confirmacion')->nullable();
             $table->timestamp('email_verificado_at')->nullable();
             $table->boolean('acceso')->default(false);

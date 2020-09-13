@@ -71,14 +71,15 @@ class UsuariosController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(EditarUsuarioRequest $request, $num_control)
+    public function update(RegistrarUsuarioRequest $request, $num_control)
     {
         $usuario = User::Buscar($num_control)->firstOrFail();
-        if ($usuario->email !== $request->email) {
-            $usuario->fill($request->all());
-            $usuario->acceso = 0;
-            $usuario->enviarEmailConfirmacion();
-        }
+        // if ($usuario->email !== $request->email) {
+        //     $usuario->fill($request->all());
+        //     $usuario->acceso = 0;
+        //     $usuario->enviarEmailConfirmacion();
+        // }
+        $usuario->fill($request->all());
         $usuario->save();
         return response()->json(['message' => 'Usuario actualizado'], 200);
     }
@@ -92,7 +93,7 @@ class UsuariosController extends Controller
     public function destroy($num_control)
     {
         $usuario = User::Buscar($num_control)->with('proyectos')->firstOrFail();
-        if ($usuario->proyectos->count())
+        if ($usuario->proyectos->count() > 0 || $usuario->asesor()->count() > 0 || $usuario->foros_user()->count() > 0)
             return response()->json(['message' => 'No se puede eliminar el registro'], 400);
         $usuario->delete();
         return response()->json(['message' => 'Usuario eliminado'], 200);
@@ -100,9 +101,18 @@ class UsuariosController extends Controller
 
     public function agregar_rolUsuario(Request $request, $num_control)
     {
-        $user = User::Buscar($num_control)->firstOrFail();
-        $rol = Roles::where('nombre_', $request->rol)->firstOrFail();
-        $user->roles()->attach($rol);
+        $request->validate([
+            'rol' => 'required|exists:roles,nombre_',            
+        ]);        
+        $usuario = User::Buscar($num_control)->first();
+        if(is_null($usuario))
+            return response()->json(['message'=>'Usuario no encontrado'], 404);
+        if ($usuario->hasRole('Alumno'))
+            return response()->json(['message' => 'Un alumno no puede tener más de un rol'], 400);
+        if (($usuario->hasRole('Docente') || $usuario->hasRole('Administrador')) && $request->rol === 'Alumno')
+            return response()->json(['message' => 'Un docente no puede tener el rol de alumno'], 400);
+        $rol = Roles::where('nombre_', $request->rol)->first();
+        $usuario->roles()->attach($rol);
         return response()->json(['message' => 'Rol agregado'], 200);
     }
     public function eliminar_rolUsuario(Request $request, $num_control)
@@ -115,8 +125,11 @@ class UsuariosController extends Controller
 
     public function docentes()
     {
-        return User::DatosBasicos()->whereHas('roles', function ($query) {
+        $docentes = User::DatosBasicos()->whereHas('roles', function ($query) {
             $query->where('roles.nombre_', 'Docente');
         })->get();
+        foreach ($docentes as $docente) {
+            // $docente->maestro = 
+        }
     }
 }

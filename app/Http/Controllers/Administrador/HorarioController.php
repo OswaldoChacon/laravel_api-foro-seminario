@@ -28,11 +28,11 @@ class HorarioController extends Controller
         $juradoQuery->select('id', 'num_control', 'prefijo', 'nombre', 'apellidoP', 'apellidoM')->whereHas('jurado_proyecto.foro', function ($query) {
             $query->where('participa', 1)->where('acceso', 1);
         });        
-        $request->filtro = 'Asignados';
+        // $request->filtro = 'Asignados';
         if ($request->filtro === 'Pendientes')
             $juradoQuery->doesntHave('horarios');
         if ($request->filtro === 'Asignados')
-            $juradoQuery->has('horarios');        
+            $juradoQuery->has('horarios');
 
         $foro = Foros::where('acceso', true)->firstOrFail();
         // if (is_null($foro))

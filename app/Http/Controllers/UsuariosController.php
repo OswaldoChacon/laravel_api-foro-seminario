@@ -59,8 +59,7 @@ class UsuariosController extends Controller
     }
     public function misNotificaciones(Request $request)
     {
-        $respuesta = $request->respuesta == 'Aceptados' ? true : ($request->respuesta == 'Rechazados' ? false : null);
-        // $enviado = $request->enviados == 'Recibidos' ? true: false;
+        $respuesta = $request->respuesta == 'Aceptados' ? true : ($request->respuesta == 'Rechazados' ? false : null);       
 
         $notificacionesQuery = Notificaciones::query();
         $usuario = JWTAuth::user();
@@ -79,29 +78,24 @@ class UsuariosController extends Controller
         }
         if (is_null($foro))
             return response()->json(['mensaje' => 'No hay ningun foro activo'], 200);
-
-        // $administradores = User::whereHas('roles', function (Builder $query) {
-        //     $query->where('roles.nombre_', 'Administrador');
-        // })->get()->pluck('id')->toArray();
+        
 
         $hoy = Carbon::now()->toDateString();
 
-        $notificacionesQuery->with(['proyecto:id,titulo,folio', 'tipo_solicitud', 'nuevo_asesor:id,prefijo,nombre,apellidoP,apellidoM'])->where('respuesta', $respuesta);
+        $notificacionesQuery->with(['proyecto', 'tipo_solicitud', 'nuevo_asesor:id,prefijo,nombre,apellidoP,apellidoM'])->where('respuesta', $respuesta);
         if ($request->rol === 'Administrador') {
             // $misNotificaciones['data'] = $notificacionesQuery->where('administrador', 1)->get();
             $notificacionesQuery->where('administrador', 1);
         } else if ($request->rol === 'Docente') {
             // $misNotificaciones['data'] = $notificacionesQuery->where('administrador', 0)->get();
-            $notificacionesQuery->where('administrador', 0)->whereHas('proyecto', function (Builder $query) {
-                $query->where('enviado', true);
-            });
+            $notificacionesQuery->where('administrador', 0);
+            // ->whereHas('proyecto', function (Builder $query) {
+                // $query->where('enviado', true);
+            // });
         } else if ($request->rol === 'Alumno') {
             $notificacionesQuery->where('administrador', 0);
         }
-        // $notificacionesQuery->whereHas('proyecto',function(Builder $query)  {
-        //     $query->where('enviado',true);
-        //     $query->where('enviado',$enviado);
-        // })
+        
         $misNotificaciones['data'] = $notificacionesQuery->get();
 
 
@@ -115,15 +109,8 @@ class UsuariosController extends Controller
         // if ($request->respuesta === 'Pendientes') {
         foreach ($misNotificaciones['data'] as $key => $solicitud) {
             // la llave
-            foreach ($solicitud as $itemSolicitud) {
-                // dd($itemSolicitud);
-                if ($request->rol === 'Alumno') {
-                    if ($key === 'REGISTRO DE PROYECTO') {
-                        $proyecto = $itemSolicitud->proyecto()->firstOrFail();
-                        $itemSolicitud->editar = !$proyecto->enviado;
-                    }
-                    $itemSolicitud->editar = $itemSolicitud->respuesta != null ? false : true;
-                }
+            foreach ($solicitud as $itemSolicitud) {                                
+                // $itemSolicitud->editar = false;
                 $total++;
             }
         }
@@ -138,7 +125,9 @@ class UsuariosController extends Controller
         if (is_null($foro))
             return response()->json(['mensaje' => 'No hay ningun foro activo'], 200);
 
-        $miSolicitud['proyecto'] = $usuario->proyectos()->with(['lineadeinvestigacion', 'tipos_proyectos', 'asesora'])->whereHas('foro', function (Builder $query) {
+        $miSolicitud['proyecto'] = $usuario->proyectos()
+        // ->select('folio','titulo','empresa','objetivo','lineadeinvestigacion_id','tipos_proyectos_id','asesor','enviado','permitir_cambios')
+        ->with(['lineadeinvestigacion', 'tipos_proyectos', 'asesora'])->whereHas('foro', function (Builder $query) {
             $query->where('acceso', true);
         })->first();
         if (is_null($miSolicitud['proyecto']))
@@ -156,16 +145,14 @@ class UsuariosController extends Controller
             });
             $miSolicitud['proyecto']->enviar = false;
             $miSolicitud['proyecto']->editar = false;
+            $miSolicitud['proyecto']->cancelar = false;
         }
         $miSolicitud['data'] = $miSolicitud['data']->groupBy('solicitud');
 
 
         $miSolicitud['proyecto']->editar = $miSolicitud['proyecto']->editarDatos();
-        $miSolicitud['proyecto']->enviar =
-            $miSolicitud['proyecto']->enviarSolicitud();
-        // true;
-        // $miSolicitud['proyecto']->enviar = false;
-        //     $miSolicitud['proyecto']->editar = false;
+        $miSolicitud['proyecto']->enviar = $miSolicitud['proyecto']->enviarSolicitud();
+        $miSolicitud['proyecto']->cancelar = $miSolicitud['proyecto']->cancelarSolicitud();        
 
 
         foreach ($miSolicitud['data'] as $solicitud) {
@@ -191,12 +178,19 @@ class UsuariosController extends Controller
         ])->firstOrFail();
         $notificacion->respuesta = $request->respuesta;
         $notificacion->save();
-        if ($usuario->hasRole('Docente') && $notificacion->respuesta === false) {
-            $proyecto->enviado = 0;
+        if($usuario->hasRole('Docente')){
+            if($notificacion->respuesta === false){
+                $proyecto->enviado = 0;
+                $proyecto->aceptado = 0;
+            }
+            else if($notificacion->respuesta === true){
+                $proyecto->aceptado= 1;
+            }            
             $proyecto->save();
-        }
+        }        
+
 
         $message = $request->respuesta ? 'Proyecto aceptado' : 'Proyecto rechazado';
-        return response()->json(['mensaje' => $message], 200);
+        return response()->json(['message' => $message], 200);
     }
 }

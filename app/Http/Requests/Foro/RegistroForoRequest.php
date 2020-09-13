@@ -2,8 +2,11 @@
 
 namespace App\Http\Requests\Foro;
 
-use Illuminate\Foundation\Http\FormRequest;
+use App\Foros;
 use Illuminate\Validation\Rule;
+use PhpParser\Node\Stmt\ElseIf_;
+use Illuminate\Foundation\Http\FormRequest;
+
 class RegistroForoRequest extends FormRequest
 {
     /**
@@ -22,12 +25,23 @@ class RegistroForoRequest extends FormRequest
      * @return array
      */
     public function rules()
-    {        
-        return [            
-            'no_foro' => 'required|numeric|unique:foros,no_foro',
-            'nombre' => 'required',
-            'periodo' => 'required|unique:foros,periodo,'.$this->id.',id,anio,'.$this->input('anio'),            
-            'anio' => 'required|integer|min:' . date('Y') . '|max:' . (date('Y') + 2).',unique:foros,anio,'.$this->id.',id,periodo,'.$this->input('periodo')
-        ];
+    {
+        if ($this->getMethod() == 'POST') {
+            return [
+                'no_foro' => 'required|numeric|unique:foros,no_foro',
+                'nombre' => 'required',
+                'periodo' => 'required|unique:foros,periodo,' . $this->id . ',id,anio,' . $this->input('anio'),
+                'anio' => 'required|integer|min:' . date('Y') . '|max:' . (date('Y') + 2) . ',unique:foros,anio,' . $this->id . ',id,periodo,' . $this->input('periodo')
+            ];
+        } else if ($this->getMethod() == 'PUT') {
+            $foro = Foros::Buscar($this->foro)->firstOrFail();
+            return [
+                //
+                'no_foro' => 'required|numeric|unique:foros,no_foro,' . $foro->id,
+                'nombre' => 'required',
+                'periodo' => 'required|unique:foros,periodo,' . $foro->id . ',id,anio,' . $this->input('anio'),
+                'anio' => 'required|integer|min:' . date('Y') . '|max:' . (date('Y') + 2) . ',unique:foros,anio,' . $foro->id . ',id,periodo,' . $this->input('periodo')
+            ];
+        }
     }
 }

@@ -2,12 +2,13 @@
 
 namespace App\Http\Requests\Linea;
 
+use App\LineasDeInvestigacion;
 use Illuminate\Foundation\Http\FormRequest;
 
 
 class RegistroLineaRequest extends FormRequest
 {
-   
+
     /**
      * Determine if the user is authorized to make this request.
      *
@@ -24,21 +25,19 @@ class RegistroLineaRequest extends FormRequest
      * @return array
      */
     public function rules()
-    {                
-        return [
-            'clave' => 'required|unique:lineasdeinvestigacion,clave',
-            'nombre' => 'required|unique:lineasdeinvestigacion,nombre'
-            //
-        ];        
-    }
-    public function messages()
     {
-
-        return [
-            'clave.required' => 'El campo clave es requerido',
-            'clave.unique' => 'La clave ingresada ya existe',
-            'nombre.required' => 'El campo nombre es requerido',
-            'nombre.unique' => 'El nombre ingresado ya existe'
-        ];
+        if ($this->getMethod() == 'POST') {
+            return [
+                'clave' => 'required|unique:lineasdeinvestigacion,clave',
+                'nombre' => 'required|unique:lineasdeinvestigacion,nombre'
+                //
+            ];
+        } else if ($this->getMethod() == 'PUT') {
+            $linea = LineasDeInvestigacion::Where('clave', $this->linea)->firstOrFail();
+            return [
+                'clave' => 'required|unique:lineasdeinvestigacion,clave,' . $linea->id,
+                'nombre' => 'required|unique:lineasdeinvestigacion,nombre,' . $linea->id
+            ];
+        }
     }
 }

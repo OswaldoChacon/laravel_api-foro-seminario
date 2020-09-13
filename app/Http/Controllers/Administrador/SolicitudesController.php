@@ -38,7 +38,7 @@ class SolicitudesController extends Controller
     public function destroy($solicitud)
     {
         $solicitud = TiposSolicitud::where('nombre_', $solicitud)->firstOrFail();
-        if($solicitud->proyectos->count())
+        if($solicitud->notificaciones->count())
             return response()->json(['message' => 'No se puede eliminar el registro'], 400);
         $solicitud->delete();        
         return response()->json(['message'=>'Registro eliminado'], 200);

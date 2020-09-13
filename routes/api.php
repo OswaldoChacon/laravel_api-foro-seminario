@@ -23,8 +23,8 @@ Route::post('forgot_password', 'UsuariosController@forgot_password');
 Route::group(['middleware' => ['jwtAuth:Administrador'], 'namespace' => 'Administrador'], function () {
 
     Route::apiResource('usuarios', 'UsuariosController');
-    Route::put('agregar_rolUsuario/{usuario}', 'UsuariosController@agregar_rolUsuario');
-    Route::delete('eliminar_rolUsuario/{usuario}', 'UsuariosController@eliminar_rolUsuario');    
+    Route::post('agregar_rolUsuario/{usuario}', 'UsuariosController@agregar_rolUsuario');
+    Route::delete('eliminar_rolUsuario/{usuario}', 'UsuariosController@eliminar_rolUsuario');
 
 
     Route::apiResource('roles', 'RolesController');
@@ -36,9 +36,10 @@ Route::group(['middleware' => ['jwtAuth:Administrador'], 'namespace' => 'Adminis
     Route::apiResource('foros', 'ForosController');
     Route::put('configurar_foro/{foro}', 'ForosController@configurar_foro');
     Route::put('activar_foro/{foro}', 'ForosController@activar_foro');
+    Route::post('agregar_maestro/{foro}','ForosController@agregar_maestro');
     Route::get('proyectos/{foro}', 'ForosController@proyectos');
 
-    
+
     Route::put('proyecto/{proyecto}', 'ProyectosController@proyecto_participa');
     //     Route::post('agregar_foroDocente/{foro}', 'OficinaController@agregar_foroDocente');
 
@@ -55,6 +56,11 @@ Route::group(['middleware' => ['jwtAuth:Administrador'], 'namespace' => 'Adminis
     Route::get('jurado', 'HorarioController@jurado');
     Route::post('asignar_jurado/{proyecto}', 'ProyectosController@asignar_jurado');
     Route::delete('eliminar_jurado/{proyecto}', 'ProyectosController@eliminar_jurado');
+
+    Route::post('agregar_horarioJurado_all/{docente}', 'HorarioController@agregar_horarioJurado_all');
+    Route::delete('eliminar_horarioJurado_all/{docente}', 'HorarioController@eliminar_horarioJurado_all');
+    Route::post('agregar_horarioJurado/{docente}', 'HorarioController@agregar_horarioJurado');
+    Route::delete('eliminar_horarioJurado/{docente}', 'HorarioController@eliminar_horarioJurado');
 });
 
 
@@ -94,12 +100,12 @@ Route::group(['middleware' => ['jwtAuth:Administrador'], 'namespace' => 'Adminis
 
 Route::group(['middleware' => ['jwtAuth:Administrador,Alumno'], 'namespace' => 'Administrador'], function () {
     Route::get('lineas', 'LineasController@index');
-    Route::get('tiposProyecto','TiposProyectoController@index');
-    Route::get('docentes','UsuariosController@docentes');
+    Route::get('tiposProyecto', 'TiposProyectoController@index');
+    Route::get('docentes', 'UsuariosController@docentes');
 });
 
 //Alumno
-Route::group(['middleware'=>['jwtAuth:Alumno']],function(){
+Route::group(['middleware' => ['jwtAuth:Alumno']], function () {
     Route::post('registrar_proyecto', 'AlumnoController@registrar_proyecto');
 
     // 
@@ -108,11 +114,12 @@ Route::group(['middleware'=>['jwtAuth:Alumno']],function(){
     // Route::get('roles','AlumnoController@roles');
     // Route::get('docentes','UsuariosController@docentes');
 
-    Route::put('actualizar_proyecto/{proyecto}','AlumnoController@actualizar_proyecto');
-    Route::put('enviar_solicitud/{proyecto}','AlumnoController@enviar_solicitud');
+    Route::put('actualizar_proyecto/{proyecto}', 'AlumnoController@actualizar_proyecto');
+    Route::put('enviar_solicitud/{proyecto}', 'AlumnoController@enviar_solicitud');
+    Route::put('cancelar_solicitud/{proyecto}', 'AlumnoController@cancelar_solicitud');
 
     Route::get('registrar_solicitud', 'AlumnoController@get_registrar_solicitud');
-    Route::post('registrar_solicitud','AlumnoController@registrar_solicitud');
+    Route::post('registrar_solicitud', 'AlumnoController@registrar_solicitud');
 });
 
 
@@ -130,9 +137,9 @@ Route::group(['middleware' => ['jwtAuth:Alumno,Administrador,Docente']], functio
     Route::get('foro_actual', 'AlumnoController@foro_actual');
     Route::get('lista_alumnos', 'AlumnoController@lista_alumnos');
 
-    Route::get('misForos','UsuariosController@misForos');
-    Route::get('misNotificaciones', 'UsuariosController@misNotificaciones'); 
-    
+    Route::get('misForos', 'UsuariosController@misForos');
+    Route::get('misNotificaciones', 'UsuariosController@misNotificaciones');
+
     Route::get('miSolicitud', 'UsuariosController@miSolicitud');
     Route::put('responder_notificacion/{proyecto}', 'UsuariosController@responder_notificacion');
     Route::post('agregar_integrante/{proyecto}', 'AlumnoController@agregar_integrante');

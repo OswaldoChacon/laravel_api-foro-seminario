@@ -91,9 +91,14 @@ class User extends Authenticatable implements JWTSubject
         return $this->belongsToMany(Proyectos::class, 'jurados', 'docente_id', 'proyecto_id');
     }
 
+    public function foro()
+    {
+        return $this->hasMany(Foros::class,'user_id');
+    }
     public function foros_user()
     {
-        return $this->belongsToMany(Foros::class);
+        // return $this->belongsToMany(Foros::class,'foros_user','user_id','foros_id');
+        return $this->belongsToMany(Foros::class,'foros_user','user_id','foros_id')->withPivot('grupo');;
     }
 
     public function proyectos()
@@ -190,7 +195,7 @@ class User extends Authenticatable implements JWTSubject
 
     public function scopeDatosBasicos($query)
     {
-        return $query->select('num_control','prefijo','nombre','apellidoP','apellidoM');
+        return $query->select('id','num_control','prefijo','nombre','apellidoP','apellidoM');
     }
     public function scopeBuscar($query, $num_control)
     {

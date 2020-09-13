@@ -56,7 +56,7 @@ class LineasController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(EditarLineaRequest $request, $clave)
+    public function update(RegistroLineaRequest $request, $clave)
     {
         //
         $linea = LineasDeInvestigacion::Where('clave', $clave)->firstOrFail();
