@@ -3,11 +3,9 @@
 namespace App\Http\Requests\Foro;
 
 use App\Foros;
-use Illuminate\Validation\Rule;
-use PhpParser\Node\Stmt\ElseIf_;
 use Illuminate\Foundation\Http\FormRequest;
 
-class RegistroForoRequest extends FormRequest
+class RegistrarForoRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.

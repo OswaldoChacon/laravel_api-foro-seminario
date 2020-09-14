@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Administrador;
 
 use App\Http\Controllers\Controller;
-
+use App\Http\Requests\Solicitud\RegistrarSolicitudRequest;
 use Illuminate\Http\Request;
 use App\TiposSolicitud;
 
@@ -18,7 +18,7 @@ class SolicitudesController extends Controller
         $solicitudes = TiposSolicitud::all();
         return response()->json($solicitudes, 200);
     }
-    public function store(Request $request)
+    public function store(RegistrarSolicitudRequest $request)
     {
         $solicitud = new TiposSolicitud();
         $solicitud->fill($request->all());
@@ -28,9 +28,9 @@ class SolicitudesController extends Controller
     public function show()
     {
     }
-    public function update(Request $request, $solicitud)
+    public function update(RegistrarSolicitudRequest $request, $solicitud)
     {
-        $solicitud = TiposSolicitud::where('nombre_', $solicitud)->firstOrFail();
+        $solicitud = TiposSolicitud::where('nombre_', $solicitud)->first();
         $solicitud->nombre_ = $request->nombre_;
         $solicitud->save();
         return response()->json(['message'=>'Registro actualizado'], 200);

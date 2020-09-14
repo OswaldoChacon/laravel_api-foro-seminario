@@ -11,13 +11,7 @@ class Foros extends Model
     protected $fillable = [
         'no_foro', 'nombre', 'periodo', 'anio'
     ];
-    protected $hidden = ['id','user_id','users'];
-    // protected $appends = ['maestros'];
-
-    // public function getMaestrosAttribute()
-    // {        
-    //     return $this->users()->get();
-    // }
+    protected $hidden = ['id', 'user_id', 'users'];
 
     public function user()
     {
@@ -25,7 +19,7 @@ class Foros extends Model
     }
     public function users()
     {
-        return $this->belongsToMany(User::class,'foros_user');
+        return $this->belongsToMany(User::class, 'foros_user');
     }
     public function proyectos()
     {
@@ -36,9 +30,13 @@ class Foros extends Model
         return $this->hasMany(Fechas_Foros::class)->orderBy('fecha');
     }
     public function canActivate()
-    {
-        if ($this->acceso)
+    {        
+        if ($this->acceso || $this->inTime())
             return true;
+        return false;        
+    }
+    public function inTime()
+    {
         $meses = array("Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre");
         $fechas_foro = explode("-", $this->periodo);
         $mes_actual = date("m");
@@ -48,14 +46,12 @@ class Foros extends Model
         }
         return false;
     }
-
     public function scopeActivo($query)
     {
         return $query->where('acceso', true);
     }
-
     public function scopeBuscar($query, $slug)
     {
-        return $query->where('slug',$slug);
+        return $query->where('slug', $slug);
     }
 }

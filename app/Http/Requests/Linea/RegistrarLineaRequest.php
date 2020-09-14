@@ -6,7 +6,7 @@ use App\LineasDeInvestigacion;
 use Illuminate\Foundation\Http\FormRequest;
 
 
-class RegistroLineaRequest extends FormRequest
+class RegistrarLineaRequest extends FormRequest
 {
 
     /**

@@ -55,7 +55,7 @@ class TiposProyectoController extends Controller
      */
     public function update(RegistrarTiposRequest $request, $clave)
     {
-        $tipo = TiposProyectos::where('clave', $clave)->firstOrFail();
+        $tipo = TiposProyectos::where('clave', $clave)->first();
         $tipo->fill($request->all())->save();
         return response()->json(['message' => 'Tipo de proyecto actualizado'], 200);     
     }

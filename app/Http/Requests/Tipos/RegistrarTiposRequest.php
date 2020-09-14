@@ -25,8 +25,7 @@ class RegistrarTiposRequest extends FormRequest
     public function rules()
     {
         if ($this->getMethod() == 'POST') {
-            return [
-                //
+            return [                
                 'clave' => 'required|unique:tipos_de_proyectos,clave',
                 'nombre' => 'required|unique:tipos_de_proyectos,nombre'
             ];

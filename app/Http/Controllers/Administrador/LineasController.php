@@ -4,9 +4,7 @@ namespace App\Http\Controllers\Administrador;
 
 use App\Http\Controllers\Controller;
 
-use App\Http\Requests\Linea\EditarLineaRequest;
-use App\Http\Requests\Linea\RegistroLineaRequest;
-use Illuminate\Http\Request;
+use App\Http\Requests\Linea\RegistrarLineaRequest;
 use App\LineasDeInvestigacion;
 
 class LineasController extends Controller
@@ -29,7 +27,7 @@ class LineasController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(RegistroLineaRequest $request)
+    public function store(RegistrarLineaRequest $request)
     {
         //
         $linea = new LineasDeInvestigacion();
@@ -56,7 +54,7 @@ class LineasController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(RegistroLineaRequest $request, $clave)
+    public function update(RegistrarLineaRequest $request, $clave)
     {
         //
         $linea = LineasDeInvestigacion::Where('clave', $clave)->firstOrFail();

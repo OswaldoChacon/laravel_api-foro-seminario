@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use JWTAuth;
 use App\User;
 use App\Foros;
-use App\Roles;
 use App\Proyectos;
 use Carbon\Carbon;
 use App\Notificaciones;
@@ -13,10 +12,9 @@ use App\TiposProyectos;
 use App\TiposSolicitud;
 use Illuminate\Http\Request;
 use App\LineasDeInvestigacion;
-use Illuminate\Support\Facades\DB;
 use App\Http\Requests\SolicitudRequest;
 use Illuminate\Database\Eloquent\Builder;
-use App\Http\Requests\Proyecto\ProyectoRequest;
+use App\Http\Requests\Proyecto\RegistrarProyectoRequest;
 use App\Http\Requests\Proyecto\EditarProyectoRequest;
 
 class AlumnoController extends Controller
@@ -80,7 +78,7 @@ class AlumnoController extends Controller
         $alumnosOrdenados = $alumnos->sortByDesc('myTeam')->values();
         return response()->json($alumnosOrdenados, 200);
     }
-    public function registrar_proyecto(ProyectoRequest $request)
+    public function registrar_proyecto(RegistrarProyectoRequest $request)
     {
         $foro = Foros::where('acceso', true)->firstOrFail();
         $hoy = Carbon::now()->toDateString();

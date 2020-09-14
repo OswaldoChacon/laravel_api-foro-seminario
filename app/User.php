@@ -177,7 +177,10 @@ class User extends Authenticatable implements JWTSubject
 
     public function getNombre()
     {
-        return strtoupper("{$this->prefijo} {$this->nombre} {$this->apellidoP} {$this->apellidoM}");
+        $prefijo = $this->prefijo === null ? '':$this->prefijo.' ';
+        if ($this->nombre === null || $this->apellidoP === null || $this->apellidoM === null)
+            return 'Datos incompletos';        
+        return strtoupper("{$prefijo}{$this->nombre} {$this->apellidoP} {$this->apellidoM}");
     }
 
     public function enviarEmailConfirmacion()

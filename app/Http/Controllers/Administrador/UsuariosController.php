@@ -73,7 +73,7 @@ class UsuariosController extends Controller
      */
     public function update(RegistrarUsuarioRequest $request, $num_control)
     {
-        $usuario = User::Buscar($num_control)->firstOrFail();
+        $usuario = User::Buscar($num_control)->first();
         // if ($usuario->email !== $request->email) {
         //     $usuario->fill($request->all());
         //     $usuario->acceso = 0;
@@ -104,9 +104,10 @@ class UsuariosController extends Controller
         $request->validate([
             'rol' => 'required|exists:roles,nombre_',            
         ]);        
-        $usuario = User::Buscar($num_control)->first();
-        if(is_null($usuario))
-            return response()->json(['message'=>'Usuario no encontrado'], 404);
+        // $usuario = User::Buscar($num_control)->firstOrFail();
+        $usuario = User::Buscar($num_control)->firstOrFail(['*'], 'First book not found');
+        // if(is_null($usuario))
+        //     return response()->json(['message'=>'Usuario no encontrado'], 404);
         if ($usuario->hasRole('Alumno'))
             return response()->json(['message' => 'Un alumno no puede tener más de un rol'], 400);
         if (($usuario->hasRole('Docente') || $usuario->hasRole('Administrador')) && $request->rol === 'Alumno')

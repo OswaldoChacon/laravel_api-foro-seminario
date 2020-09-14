@@ -35,11 +35,13 @@ class FechaForoController extends Controller
         $foro = Foros::Buscar($request->slug)->firstOrFail();
         // $foro = Foros::Where('slug', $request->slug)->firstOrFail();
         if (!$foro->acceso)
-            return response()->json(['mensaje' => 'Foro no activo'], 500);
+            return response()->json(['message' => 'Foro no activo'], 400);
+        if(!$foro->inTime())
+            return response()->json(['message' => 'Foro fuera de tiempo'], 400);
         $fecha->fill($request->all());
         $fecha->foros_id = $foro->id;
         $fecha->save();
-        return response()->json(['mensaje' => 'Fecha registrada'], 200);
+        return response()->json(['message' => 'Fecha registrada'], 200);
     }
 
     /**
@@ -64,6 +66,11 @@ class FechaForoController extends Controller
     public function update(EditarFechaRequest $request, $fecha)
     {
         $fecha = Fechas_Foros::Where('fecha', $fecha)->firstOrFail();
+        $foro = $fecha->foro()->first();
+        if (!$foro->acceso)
+            return response()->json(['message' => 'Foro no activo'], 422);
+        if(!$foro->inTime())
+            return response()->json(['message' => 'Foro fuera de tiempo'], 400);
         $fecha->fill($request->all());
         $fecha->save();
         return response()->json(['Success' => 'Fecha actualizada']);
@@ -88,6 +95,8 @@ class FechaForoController extends Controller
         $foro = $fecha->foro()->first();
         if (!$foro->acceso)
             return response()->json(['message' => 'Foro no activo'], 422);
+        if(!$foro->inTime())
+            return response()->json(['message' => 'Foro fuera de tiempo'], 400);
         $receso = new HorarioBreak();
         $receso->fill($request->all());
         $receso->fechas_foros_id = $fecha->id;

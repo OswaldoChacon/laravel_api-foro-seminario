@@ -10,10 +10,8 @@ use App\Proyectos;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
-use Illuminate\Database\Eloquent\Builder;
 use App\Http\Requests\Foro\ConfigForoRequest;
-use App\Http\Requests\Foro\EditarForoRequest;
-use App\Http\Requests\Foro\RegistroForoRequest;
+use App\Http\Requests\Foro\RegistrarForoRequest;
 
 class ForosController extends Controller
 {
@@ -33,7 +31,7 @@ class ForosController extends Controller
         }
         return response()->json($foros, 200);
     }
-    public function store(RegistroForoRequest $request)
+    public function store(RegistrarForoRequest $request)
     {
         $usuario = JWTAuth::user();
         $prefijo = str_split($request->anio);
@@ -54,8 +52,6 @@ class ForosController extends Controller
     public function show($slug)
     {
         $foro = Foros::with(['fechas'])->Buscar($slug)->firstOrFail();
-        // if (!$foro->acceso)
-        //     return response()->json(['message' => 'Foro no activo'], 422);
         $posicionET = 0;
         foreach ($foro->fechas as $fecha) {
             $recesos = $fecha->receso()->select('posicion')->get()->pluck('posicion')->toArray();
@@ -67,6 +63,7 @@ class ForosController extends Controller
             }
             $fecha->length = $posicionET;
         }
+        $foro->docentes = $foro->users()->get();
         if ($foro->acceso) {
             $docentes = User::DatosBasicos()->whereHas('roles', function ($query) {
                 $query->where('roles.nombre_', 'Docente');
@@ -74,13 +71,14 @@ class ForosController extends Controller
             foreach ($docentes as $docente) {
                 $docente['taller'] = $docente->foros_user()->where('slug', $slug)->count() > 0 ? true : false;
             }
-            // $docentes=$docente->orderBy('taller');
-            // dd($docentes);
             $foro->docentes = $docentes;
+        }
+        else{
+
         }
         return response()->json($foro, 200);
     }
-    public function update(RegistroForoRequest $request, $slug)
+    public function update(RegistrarForoRequest $request, $slug)
     {
         $foro = Foros::Buscar($slug)->firstOrFail();
         $foro->fill($request->all());
@@ -96,12 +94,13 @@ class ForosController extends Controller
         $foro->delete();
         return response()->json(['message' => 'Foro eliminado'], 200);
     }
-
     public function configurar_foro(ConfigForoRequest $request, $slug)
     {
         $foro = Foros::Buscar($slug)->firstOrFail();
         if (!$foro->acceso)
-            return response()->json(['message' => 'Foro no activo'], 500);
+            return response()->json(['message' => 'Foro inactivo'], 400);        
+        if(!$foro->inTime())
+            return response()->json(['message' => 'Foro fuera de tiempo'], 400);
         $foro->lim_alumnos = $request->lim_alumnos;
         $foro->num_aulas = $request->num_aulas;
         $foro->duracion = $request->duracion;
@@ -112,16 +111,21 @@ class ForosController extends Controller
     public function activar_foro(Request $request, $slug)
     {
         $request->validate(['acceso' => 'required|boolean']);
-        $foros = Foros::Where('acceso', true)->get();
+        $foro = Foros::Buscar($slug)->firstOrFail();        
+        $foros = Foros::Where([
+            ['acceso', true],
+            ['slug','!=',$slug]
+        ])->get();
         if ($request->acceso && !$foros->isEmpty())
             return response()->json(['message' => 'No se permite tener dos foros activos'], 400);
-        if (!$request->acceso) {
-            $foro = Foros::Buscar($slug)->firstOrFail();
-            $foro->acceso = $request->acceso;
-            $foro->save();
-            $message = $request->acceso ? 'Foro activado' : 'Foro desactivado';
-            return response()->json(['message' => $message], 200);
+        if($request->acceso){
+            if(!$foro->canActivate())
+                return response()->json(['message' => 'No puedes activar/desactivar un foro fuera de tiempo'], 400);                
         }
+        $foro->acceso = $request->acceso;        
+        $foro->save();
+        $message = $request->acceso ? 'Foro activado' : 'Foro desactivado';
+        return response()->json(['message' => $message], 200);
     }
     public function agregar_maestro(Request $request, $slug)
     {
@@ -129,13 +133,13 @@ class ForosController extends Controller
         if (!$foro->acceso)
             return response()->json(['message' => 'No puedes agregar maestros a un foro inactivo'], 400);
         $maestro = User::Buscar($request->num_control)->firstOrFail();
-        if(!$maestro->hasRole('Docente'))
+        if (!$maestro->hasRole('Docente'))
             return response()->json(['message' => 'El usuario que deseas agregar no tiene el rol necesario'], 400);
-        if($request->agregar)
+        if ($request->agregar)
             $maestro->foros_user()->attach($foro);
-        if(!$request->agregar)
+        if (!$request->agregar)
             $maestro->foros_user()->detach($foro);
-        $message = $request->agregar ? 'Maestro agregado':'Maestro eliminado';
+        $message = $request->agregar ? 'Maestro agregado' : 'Maestro eliminado';
         return response()->json(['message' => $message], 200);
     }
     public function proyectos(Request $request, $slug)
