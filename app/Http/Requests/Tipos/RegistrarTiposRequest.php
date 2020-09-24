@@ -2,7 +2,7 @@
 
 namespace App\Http\Requests\Tipos;
 
-use App\TiposProyectos;
+use App\TipoDeProyecto;
 use Illuminate\Foundation\Http\FormRequest;
 
 class RegistrarTiposRequest extends FormRequest
@@ -26,14 +26,13 @@ class RegistrarTiposRequest extends FormRequest
     {
         if ($this->getMethod() == 'POST') {
             return [                
-                'clave' => 'required|unique:tipos_de_proyectos,clave',
-                'nombre' => 'required|unique:tipos_de_proyectos,nombre'
+                'clave' => 'required|unique:tipos_de_proyecto,clave',
+                'nombre' => 'required|unique:tipos_de_proyecto,nombre'
             ];
-        } else if ($this->getMethod() == 'PUT') {
-            $tipos = TiposProyectos::Where('clave', $this->tiposProyecto)->firstOrFail();
+        } else if ($this->getMethod() == 'PUT') {            
             return [
-                'clave' => 'required|unique:tipos_de_proyectos,clave,' . $tipos->id,
-                'nombre' => 'required|unique:tipos_de_proyectos,nombre,' . $tipos->id
+                'clave' => 'required|unique:tipos_de_proyecto,clave,' . $this->tiposProyecto->id,
+                'nombre' => 'required|unique:tipos_de_proyecto,nombre,' . $this->tiposProyecto->id
             ];
         }
     }

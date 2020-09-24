@@ -25,8 +25,7 @@ class AuthController extends Controller
             $usuario->acceso = 1;
             $usuario->save();
         }
-
-        // $usuario->nombreCompleto = $user->getNombre();
+                
         if (!$usuario->hasAnyRole($usuario->roles())) {
             return response()->json(['titulo' => 'Acceso denegado', 'message' => 'No tiene ningún rol asignado'], 403);
         }

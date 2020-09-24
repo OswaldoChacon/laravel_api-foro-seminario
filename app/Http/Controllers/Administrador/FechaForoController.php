@@ -2,14 +2,14 @@
 
 namespace App\Http\Controllers\Administrador;
 
-use App\Foros;
-use App\Fechas_Foros;
-use App\HorarioBreak;
-use Illuminate\Http\Request;
+use App\Foro;
+use App\FechaForo;
+use App\Receso;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Fecha\BreakRequest;
-use App\Http\Requests\Fecha\EditarFechaRequest;
+use App\Http\Requests\Fecha\RegistrarFechaRequest;
+
 
 class FechaForoController extends Controller
 {
@@ -29,17 +29,16 @@ class FechaForoController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
-    {
-        $fecha = new Fechas_Foros();
-        $foro = Foros::Buscar($request->slug)->firstOrFail();
-        // $foro = Foros::Where('slug', $request->slug)->firstOrFail();
-        if (!$foro->acceso)
-            return response()->json(['message' => 'Foro no activo'], 400);
+    public function store(RegistrarFechaRequest $request)
+    {        
+        $foro = Foro::Buscar($request->slug)->first();        
+        if (!$foro->activo)
+            return response()->json(['message' => 'Foro inactivo'], 400);
         if(!$foro->inTime())
             return response()->json(['message' => 'Foro fuera de tiempo'], 400);
+        $fecha = new FechaForo();
         $fecha->fill($request->all());
-        $fecha->foros_id = $foro->id;
+        $fecha->foro()->associate($foro);        
         $fecha->save();
         return response()->json(['message' => 'Fecha registrada'], 200);
     }
@@ -52,7 +51,9 @@ class FechaForoController extends Controller
      */
     public function show($fecha)
     {
-        $fecha = Fechas_Foros::Where('fecha', $fecha)->firstOrFail();
+        $fecha = FechaForo::Where('fecha', $fecha)->first();
+        if(is_null($fecha))
+            return response()->json(['message' => 'Fecha no encontrada'], 404);
         return response()->json($fecha, 200);
     }
 
@@ -63,17 +64,21 @@ class FechaForoController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(EditarFechaRequest $request, $fecha)
+    public function update(RegistrarFechaRequest $request, $fecha)
     {
-        $fecha = Fechas_Foros::Where('fecha', $fecha)->firstOrFail();
+        $fecha = FechaForo::Where('fecha', $fecha)->first();
+        if(is_null($fecha))
+            return response()->json(['message' => 'Fecha no encontrada'], 404);
         $foro = $fecha->foro()->first();
-        if (!$foro->acceso)
-            return response()->json(['message' => 'Foro no activo'], 422);
+        if(is_null($foro))
+            return response()->json(['message' => 'Foro no encontrado'], 404);
+        if (!$foro->activo)
+            return response()->json(['message' => 'Foro inactivo'], 400);
         if(!$foro->inTime())
             return response()->json(['message' => 'Foro fuera de tiempo'], 400);
         $fecha->fill($request->all());
         $fecha->save();
-        return response()->json(['Success' => 'Fecha actualizada']);
+        return response()->json(['Success' => 'Fecha actualizada'],200);
     }
 
     /**
@@ -84,20 +89,26 @@ class FechaForoController extends Controller
      */
     public function destroy($fecha)
     {
-        $fecha = Fechas_Foros::Where('fecha', $fecha)->firstOrFail();
+        $fecha = FechaForo::Where('fecha', $fecha)->first();
+        if(is_null($fecha))
+            return response()->json(['message' => 'Fecha no encontrada'], 404);
         // dd($fecha->has('receso')->delete(),$fecha->receso()->get()->flatten());        
         $fecha->delete();
         return response()->json(['Success' => 'Fecha eliminada']);
     }
     public function agregar_break(BreakRequest $request, $fecha)
     {
-        $fecha = Fechas_Foros::Where('fecha', $fecha)->firstOrFail();
+        $fecha = FechaForo::Where('fecha', $fecha)->first();
+        if(is_null($fecha))
+            return response()->json(['message' => 'Fecha no encontrada'], 404);
         $foro = $fecha->foro()->first();
-        if (!$foro->acceso)
-            return response()->json(['message' => 'Foro no activo'], 422);
+        if(is_null($foro))
+            return response()->json(['message' => 'Foro no encontrado'], 404);
+        if (!$foro->activo)
+            return response()->json(['message' => 'Foro inactivo'], 400);
         if(!$foro->inTime())
             return response()->json(['message' => 'Foro fuera de tiempo'], 400);
-        $receso = new HorarioBreak();
+        $receso = new Receso();
         $receso->fill($request->all());
         $receso->fechas_foros_id = $fecha->id;
         DB::table('horario_jurado')->where('posicion', $request->posicion)->delete();
@@ -106,12 +117,16 @@ class FechaForoController extends Controller
     }
     public function eliminar_break(BreakRequest $request, $fecha)
     {
-        $fecha = Fechas_Foros::Where('fecha', $fecha)->firstOrFail();
+        $fecha = FechaForo::Where('fecha', $fecha)->first();
+        if(is_null($fecha))
+            return response()->json(['message' => 'Fecha no encontrada'], 404);
         $foro = $fecha->foro()->first();
-        if (!$foro->acceso)
-            return response()->json(['message' => 'Foro no activo'], 422);
-        $receso = HorarioBreak::Where([
-            ['fechas_foros_id', $fecha->id],
+        if(is_null($foro))
+            return response()->json(['message' => 'Foro no encontrado'], 404);        
+        if (!$foro->activo)
+            return response()->json(['message' => 'Foro inactivo'], 400);
+        $receso = Receso::Where([
+            ['fechaforo_id', $fecha->id],
             ['posicion', $request->posicion]
         ])->firstOrFail();
         $receso->delete();

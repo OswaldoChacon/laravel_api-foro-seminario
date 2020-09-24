@@ -2,7 +2,7 @@
 
 namespace App\Http\Requests\Solicitud;
 
-use App\TiposSolicitud;
+use App\TipoDeSolicitud;
 use Illuminate\Foundation\Http\FormRequest;
 
 class RegistrarSolicitudRequest extends FormRequest
@@ -26,12 +26,11 @@ class RegistrarSolicitudRequest extends FormRequest
     {
         if ($this->getMethod() == 'POST') {
             return [
-                'nombre_' => 'required|unique:tipos_solicitud,nombre_'
+                'nombre_' => 'required|unique:tipos_de_solicitud,nombre_'
             ];
-        } elseif ($this->getMethod() == 'PUT') {
-            $solicitud = TiposSolicitud::where('nombre_', $this->solicitude)->firstOrFail();
+        } elseif ($this->getMethod() == 'PUT') {            
             return [
-                'nombre_' => 'required|unique:tipos_solicitud,nombre_,'.$solicitud->id
+                'nombre_' => 'required|unique:tipos_de_solicitud,nombre_,'.$this->solicitude->id
             ];
         }
     }

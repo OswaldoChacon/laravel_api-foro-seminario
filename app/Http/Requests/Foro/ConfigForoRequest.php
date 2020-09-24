@@ -28,7 +28,7 @@ class ConfigForoRequest extends FormRequest
             'lim_alumnos' => 'required|numeric|min:1',
             'num_aulas' => 'required|numeric|min:1',
             'duracion' => 'required|numeric|min:15',
-            'num_maestros' => 'required|numeric|min:1'
+            'num_maestros' => 'required|numeric|min:2'
         ];
     }
 }

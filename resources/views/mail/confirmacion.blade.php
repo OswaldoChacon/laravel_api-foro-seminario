@@ -6,7 +6,8 @@
 </head>
 
 <body style="margin: 0; padding: 0;">
-    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+    <!-- <table border="0" cellpadding="0" cellspacing="0" width="100%"> -->
+    <table border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color:#F5F5F5;">
         <tr>
             <td style="padding: 10px 0 30px 0;">
                 <table align="center" border="0" cellpadding="0" cellspacing="0" width="600"
@@ -18,13 +19,16 @@
                                 <tr>
                                     <td style="color: #ffffff; font-family: Arial, sans-serif; font-size: 14px;"
                                         width="50%">
-                                        <img src="{{asset('/img/tecnm.png')}}" style="width: 100%">
+                                        <!-- <img src="{{asset('/img/tecnm.png')}}" style="width: 100%"> -->
+                                        <img src="https://estudiantes.ittg.edu.mx/static/img/tecnm.f36b3f5.png" style="height: 15%">
                                     </td>
                                     <td align="right" width="50%">
-                                        <img src="{{asset('/img/logo.png')}}" style="width: 60%">
+                                        <!-- <img src="{{asset('/img/logo.png')}}" style="width: 60%"> -->
+                                        <img src="https://estudiantes.ittg.edu.mx/static/img/logo.27496e3.png" style="height: 15%">
+                                        
                                     </td>
                                 </tr>
-                            </table>
+                            </table>                            
                         </td>
                     </tr>
                     <tr>

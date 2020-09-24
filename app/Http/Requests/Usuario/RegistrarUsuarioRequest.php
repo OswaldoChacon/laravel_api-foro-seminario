@@ -32,10 +32,10 @@ class RegistrarUsuarioRequest extends FormRequest
             ];
         }
         if ($this->getMethod() == 'PUT') {
-            $usuario = User::Buscar($this->usuario)->firstOrFail();            
+            // $usuario = User::Buscar($this->usuario)->firstOrFail();            
             $rules = [
-                'num_control' => 'unique:users,num_control,'.$usuario->id,
-                'email' => 'required|unique:users,email,'.$usuario->id,
+                'num_control' => 'unique:users,num_control,'.$this->usuario->id,
+                'email' => 'required|unique:users,email,'.$this->usuario->id,
             ];
         }
         return $rules;

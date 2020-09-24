@@ -2,7 +2,7 @@
 
 namespace App\Http\Requests\Linea;
 
-use App\LineasDeInvestigacion;
+use App\LineaDeInvestigacion;
 use Illuminate\Foundation\Http\FormRequest;
 
 
@@ -28,15 +28,13 @@ class RegistrarLineaRequest extends FormRequest
     {
         if ($this->getMethod() == 'POST') {
             return [
-                'clave' => 'required|unique:lineasdeinvestigacion,clave',
-                'nombre' => 'required|unique:lineasdeinvestigacion,nombre'
-                //
+                'clave' => 'required|unique:lineas_de_investigacion,clave',
+                'nombre' => 'required|unique:lineas_de_investigacion,nombre',
             ];
         } else if ($this->getMethod() == 'PUT') {
-            $linea = LineasDeInvestigacion::Where('clave', $this->linea)->firstOrFail();
             return [
-                'clave' => 'required|unique:lineasdeinvestigacion,clave,' . $linea->id,
-                'nombre' => 'required|unique:lineasdeinvestigacion,nombre,' . $linea->id
+                'clave' => 'required|unique:lineas_de_investigacion,clave,' . $this->linea->id,
+                'nombre' => 'required|unique:lineas_de_investigacion,nombre,' . $this->linea->id
             ];
         }
     }

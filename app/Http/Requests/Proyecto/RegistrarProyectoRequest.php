@@ -23,14 +23,25 @@ class RegistrarProyectoRequest extends FormRequest
      */
     public function rules()
     {
-        return [
-            //
-            'titulo'=>'required|unique:proyectos,titulo|max:255',
-            'objetivo'=>'required|max:255',
-            'empresa'=>'required|max:255',
-            'linea'=>'required',
-            'tipo'=>'required',
-            'asesor'=>'required',
-        ];
+        if ($this->getMethod() == 'POST') {
+            return [
+                //
+                'titulo' => 'required|unique:proyectos,titulo|max:255',
+                'objetivo' => 'required|max:255',
+                'empresa' => 'required|max:255',
+                'linea' => 'required|exists:lineas_de_investigacion,clave',
+                'tipo' => 'required|exists:tipos_de_proyecto,clave',
+                'asesor' => 'required|exists:users,num_control',
+            ];
+        } else if ($this->getMethod() == 'PUT') {            
+            return [
+                'titulo' => 'required|max:255|unique:proyectos,titulo,'.$this->proyecto->id,
+                'objetivo' => 'required|max:255',
+                'empresa' => 'required|max:255',
+                'linea' => 'required|exists:lineas_de_investigacion,clave',
+                'tipo' => 'required|exists:tipos_de_proyecto,clave',
+                'asesor' => 'required|exists:users,num_control',
+            ];
+        }
     }
 }
