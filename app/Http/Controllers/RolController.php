@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Administrador;
+namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Rol\RegistrarRolRequest;
@@ -32,12 +32,11 @@ class RolController extends Controller
         $rol->save();
         return response()->json(['message' => 'Rol actualizado'], 200);
     }
-    public function destroy($rol)
+    public function destroy(Rol $role)
     {
-        $rol = Rol::where('nombre_', $rol)->firstOrFail();
-        if($rol->users()->count())
+        if($role->users()->count())
             return response()->json(['message' => 'No se puede eliminar el registro'], 400);
-        $rol->delete();
+        $role->delete();
         return response()->json(['message' => 'Rol eliminado'], 200);
     }
 }

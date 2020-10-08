@@ -5,8 +5,7 @@ namespace App;
 use Illuminate\Database\Eloquent\Model;
 
 class LineaDeInvestigacion extends Model
-{
-    //
+{    
     public $timestamps = false;
     public $table = "lineas_de_investigacion";
     protected $fillable = [
@@ -21,11 +20,12 @@ class LineaDeInvestigacion extends Model
     }
     public function proyectos()
     {
-        // return $this->hasMany(Proyecto::class, 'lineadeinvestigacion_id');
         return $this->hasMany(Proyecto::class);
     }
+
+    // scopes
     public function scopeBuscar($query, $clave)
     {
-        return $query->where('clave',$clave);
+        return $query->where('clave', $clave);
     }
 }

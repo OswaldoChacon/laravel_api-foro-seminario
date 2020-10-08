@@ -11,7 +11,7 @@ class Foro extends Model
         'no_foro', 'nombre', 'periodo', 'anio', 'fecha_limite'
     ];
     protected $hidden = [
-        'id', 'user_id', //'users'
+        'id', 'user_id',
     ];
 
     public function getRouteKeyName()
@@ -35,36 +35,37 @@ class Foro extends Model
         return $this->hasMany(FechaForo::class)->orderBy('fecha');
     }
 
-    // fin de relaciones
-
-    // inicia validaciones
-    public function getPrefijo($anio,$periodo)
-    {
-        $prefijo = str_split($anio);
-        $prefijo = $prefijo[2] . $prefijo[3];
-        if ($periodo == "Agosto-Diciembre") {
-            $prefijo = $prefijo . "02-";
-        } else {
-            $prefijo = $prefijo . "01-";
-        }
-        return $prefijo;
-    }
+    // validaciones
     public function canActivate()
-    {
-        if ($this->activo || $this->inTime())
-            return true;
-        return false;
+    {        
+        return true;
+        // if ($this->activo || $this->inTime())
+        //     return true;
+        // return false;
     }
     public function inTime()
     {
         $meses = array("ENERO", "FEBRERO", "MARZO", "ABRIL", "MAYO", "JUNIO", "JULIO", "AGOSTO", "SEPTIEMBRE", "OCTUBRE", "NOVIEMBRE", "DICIEMBRE");
         $fechas_foro = explode("-", $this->periodo);
         $mes_actual = date("m");
-        if (date("Y") == $this->anio) {
+        if (date("Y") == $this->anio) {            
             if ((array_search($fechas_foro[0], $meses) + 1) <= $mes_actual && $mes_actual <= array_search($fechas_foro[1], $meses) + 1)
                 return true;
         }
         return false;
+    }
+
+    // getters
+    public function getPrefijo($anio, $periodo)
+    {
+        $prefijo = str_split($anio);
+        $prefijo = $prefijo[2] . $prefijo[3];
+        if ($periodo == "Agosto-Diciembre") {
+            $prefijo = $prefijo . "02_";
+        } else {
+            $prefijo = $prefijo . "01_";
+        }
+        return $prefijo;
     }
     public function getDocentesAttribute()
     {
@@ -77,10 +78,11 @@ class Foro extends Model
         }
         return $docentes;
     }
+
     // scopes    
-    public function scopeActivo($query)
+    public function scopeActivo($query, $valor)
     {
-        return $query->where('activo', true);
+        return $query->where('activo', $valor);
     }
     public function scopeBuscar($query, $slug)
     {

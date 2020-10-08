@@ -19,8 +19,8 @@ class UserPolicy
     {
         //
     }
-    public function actualizar_info(User $user)
-    {                
+    public function actualizar_datos(User $user)
+    {                        
         return JWTAuth::user()->id === $user->id;
     }
 }

@@ -18,10 +18,8 @@ class CreateRecesosTable extends Migration
             $table->string('hora');
             $table->integer('posicion')->unique();    
             //$table->integer('disponible');
-            $table->unsignedInteger('fecha_foro_id');
-            //$table->foreign('fechas_foros_id')->references('id')->on('fechas_foros')->onDelete('cascade');
+            $table->unsignedInteger('fecha_foro_id');            
             $table->foreign('fecha_foro_id')->references('id')->on('fechas_foros')->onDelete('cascade');
-            // $table->timestamps();
         });
     }
 

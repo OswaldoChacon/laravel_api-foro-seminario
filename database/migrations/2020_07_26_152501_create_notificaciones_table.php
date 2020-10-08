@@ -15,6 +15,7 @@ class CreateNotificacionesTable extends Migration
     {
         Schema::create('notificaciones', function (Blueprint $table) {
             $table->bigIncrements('id');
+            $table->string('folio');
             $table->unsignedInteger('emisor_id');
             $table->foreign('emisor_id')->references('id')->on('users')->onDelete('cascade');
             $table->unsignedInteger('receptor_id');

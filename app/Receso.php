@@ -15,10 +15,11 @@ class Receso extends Model
         'hora', 'posicion'
     ];
     protected $hidden = [
-        'id', 'fechaforo_id'
+        'id', 'fecha_foro_id',
+        // 'hora'
     ];
 
-    public function fechaForo()
+    public function fecha_foro()
     {
         // return $this->belongsTo(FechaForo::class, 'fechaforo_id');
         return $this->belongsTo(FechaForo::class);

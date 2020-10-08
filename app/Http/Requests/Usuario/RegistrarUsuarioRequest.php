@@ -24,24 +24,19 @@ class RegistrarUsuarioRequest extends FormRequest
      */
     public function rules()
     {
-        
+
         if ($this->getMethod() == 'POST') {
             $rules = [
-                'email'=>'required|unique:users,email',
-                'num_control'=>'required|unique:users,num_control',
+                'email' => 'required|unique:users,email',
+                'num_control' => 'required|unique:users,num_control',
             ];
         }
-        if ($this->getMethod() == 'PUT') {
-            // $usuario = User::Buscar($this->usuario)->firstOrFail();            
+        if ($this->getMethod() == 'PUT') {            
             $rules = [
-                'num_control' => 'unique:users,num_control,'.$this->usuario->id,
-                'email' => 'required|unique:users,email,'.$this->usuario->id,
+                'num_control' => 'required|unique:users,num_control,' . $this->usuario->id,
+                'email' => 'required|unique:users,email,' . $this->usuario->id,
             ];
         }
         return $rules;
-        // return [            
-        //     'email'=>'required|unique:users,email',
-        //     'num_control'=>'required|unique:users,num_control',
-        // ];
     }
 }

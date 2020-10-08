@@ -8,18 +8,16 @@ use Illuminate\Database\Eloquent\Builder;
 class Horario extends Model
 {
     //
-    public $timestamps = false;
-    // protected $table = "horario_jurado";
+    public $timestamps = false;    
     protected $fillable = [
         'hora', 'posicion'
     ];
     protected $hidden = [
-        'id', 'docente_id', 'fechas_foros_id'
+        'id', 'user_id', 'fecha_foro_id'
     ];
 
     public function user()
-    {
-        // cambiar por user?
+    {        
         return $this->belongsTo(User::class);
     }
     public function fechaForo()
@@ -27,6 +25,7 @@ class Horario extends Model
         return $this->belongsTo(FechaForo::class);
     }
 
+    // scopes
     public function scopeBuscarFecha($query, $fecha)
     {
         return $query->whereHas('fechaForo',function(Builder $query) use($fecha){

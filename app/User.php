@@ -8,8 +8,9 @@ use Illuminate\Notifications\Notifiable;
 use Tymon\JWTAuth\Contracts\JWTSubject;
 use App\Mail\confirmacion;
 use App\Mail\EmailConfirmacion;
+use App\Mail\ForgotPassword;
 use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Str;
+
 use Illuminate\Support\Facades\DB;
 
 
@@ -33,7 +34,7 @@ class User extends Authenticatable implements JWTSubject
      * @var array
      */
     protected $hidden = [
-        'id', 'password', 'remember_token', 'email_verificado_at', 'cod_confirmacion', 'confirmado', 'pivot'
+        'id', 'password', 'remember_token', 'confirmado', 'pivot'
     ];
 
     /**
@@ -53,11 +54,6 @@ class User extends Authenticatable implements JWTSubject
     {
         return 'num_control';
     }
-    public function getNombreCompletoAttribute()
-    {
-        return $this->getNombre();
-    }
-
     public function getJWTIdentifier()
     {
         return $this->num_control;
@@ -67,65 +63,50 @@ class User extends Authenticatable implements JWTSubject
     {
         return 'num_control'; // the key name you what to use as the JWT's subject in User model
     }
-
     public function getJWTCustomClaims()
     {
         return [
             'roles'    => $this->getMisRoles()
         ];
     }
-
     public function roles()
     {
         return $this->belongsToMany(Rol::class);
     }
-
     public function asesor()
     {
         return $this->hasMany(Proyecto::class, 'asesor_id');
     }
-
     public function jurado_proyecto()
     {
         return $this->belongsToMany(Proyecto::class, 'jurados', 'user_id', 'proyecto_id');
     }
-
     public function foros()
     {
-        // return $this->hasMany(Foro::class,'user_id');
         return $this->hasMany(Foro::class);
     }
     public function foros_users()
     {
-        // return $this->belongsToMany(Foro::class,'foro_user','user_id','foro_id');
         return $this->belongsToMany(Foro::class);
     }
-
     public function proyectos()
     {
-        // return $this->belongsToMany(Proyecto::class, 'proyecto_user');
         return $this->belongsToMany(Proyecto::class);
     }
-
+    public function horarios()
+    {
+        return $this->hasMany(Horario::class);
+    }
     public function miSolicitud()
     {
         return $this->hasMany(Notificacion::class, 'emisor_id');
     }
-
     public function misNotificaciones()
     {
-        // return $this->hasMany(Notificacion::class, 'receptor');
         return $this->hasMany(Notificacion::class, 'receptor_id');
     }
 
-    public function horarios()
-    {
-        // return $this->hasMany(Horario::class, 'user_id');
-        return $this->hasMany(Horario::class);
-    }
-
-
-    // validación de roles
+    // validaciones
     public function hasAnyRole($roles)
     {
         foreach ($roles as $rol) {
@@ -134,24 +115,35 @@ class User extends Authenticatable implements JWTSubject
         }
         return false;
     }
-
     public function hasRole($rol)
     {
         if ($this->roles()->where('nombre_', $rol)->count() > 0)
             return true;
+        if ($rol === 'Taller')
+            if ($this->foros_users()->Activo(true)->count() > 0)
+                return true;
         return false;
     }
-
-
-
-    // funciones agenas a las relaciones en la bd
-    public function getMisRoles()
+    public function hasProject()
     {
-        $roles = array();
-        foreach ($this->roles()->get() as $rol) {
-            array_push($roles, $rol->nombre_);
-        }
-        return $roles;
+        if (User::whereHas('proyectos.foro', function (Builder $query) {
+            $query->where('promedio', '>', 69)->Activo(false);
+        })->orWhereHas('proyectos.foro', function (Builder $query) {
+            $query->Activo(true);
+        })->UsuariosConRol('Alumno')->Buscar($this->num_control)->count() > 0)
+            return false;
+        return true;
+    }
+    public function esJurado()
+    {
+        return $this->jurado_proyecto()->whereHas('foro', function (Builder $query) {
+            $query->Activo(true);
+        })->count() > 0;
+    }
+    public function esMiProyecto(Proyecto $proyecto)
+    {
+        // dd($this->proyectos()->get()->contains($proyecto));
+        return $this->proyectos()->get()->contains($proyecto);
     }
     public function validarDatosCompletos()
     {
@@ -160,49 +152,11 @@ class User extends Authenticatable implements JWTSubject
         return true;
     }
 
-    public function getProyectoActual()
+    // getters
+    public function getNombreCompletoAttribute()
     {
-        return $this->proyectos()->with('asesor')->whereHas('foro', function (Builder $query) {
-            $query->where('activo', true);
-        })->first();
+        return $this->getNombre();
     }
-
-    public function hasProject()
-    {
-        if (User::whereHas('proyectos.foro', function (Builder $query) {
-            $query->where('promedio', '>', 69)->where('activo', false);
-        })->orWhereHas('proyectos.foro', function (Builder $query) {
-            $query->where('activo', true);
-        })->UsuariosConRol('Alumno')->Buscar($this->num_control)->count() > 0)
-            return false;
-        return true;
-    }
-
-    
-    public function getNombre()
-    {
-        $prefijo = $this->prefijo === null ? '' : $this->prefijo . ' ';
-        if ($this->nombre === null || $this->apellidoP === null || $this->apellidoM === null)
-            return 'Datos incompletos';
-        return strtoupper("{$prefijo}{$this->nombre} {$this->apellidoP} {$this->apellidoM}");
-    }
-
-    public function enviarEmailConfirmacion()
-    {
-        $this->cod_confirmacion = Str::random(25);
-        $this->password = Str::random(10);
-        $data = [
-            'nombre' => strtoupper($this->nombre),
-            'password' => $this->password,
-            'cod_confirmacion' => $this->cod_confirmacion
-        ];
-        // Mail::to($this->email)->send(new EmailConfirmacion($data));
-        Mail::to($this->email)->send(new confirmacion($data));
-        $this->password = bcrypt($this->password);
-    }
-
-
-
     public function getRolesAttribute()
     {
         $roles = Rol::all();
@@ -211,11 +165,60 @@ class User extends Authenticatable implements JWTSubject
         }
         return $roles;
     }
+    public function getNombre()
+    {
+        $prefijo = $this->prefijo === null ? '' : $this->prefijo . ' ';
+        if ($this->nombre === null || $this->apellidoP === null || $this->apellidoM === null)
+            return 'Datos incompletos';
+        return strtoupper("{$prefijo}{$this->nombre} {$this->apellidoP} {$this->apellidoM}");
+    }
+    public function getMisRoles()
+    {
+        $roles = array();
+        foreach ($this->roles()->get() as $rol) {
+            array_push($roles, $rol->nombre_);
+        }
+        if ($this->foros_users()->Activo(true)
+            // where('activo', true)
+            ->count() > 0
+        )
+            array_push($roles, 'Taller');
+        return $roles;
+    }
+    public function getProyectoActual()
+    {
+        return $this->proyectos()->with('asesor')->whereHas('foro', function (Builder $query) {
+            $query->Activo(true);
+        })->first();
+    }
+    public function enviarEmail($password, $type)
+    {
+        $data = [
+            'nombre' => strtoupper($this->nombre),
+            'password' => $password,
+        ];
+        if ($type === 'forgot_password')
+            Mail::to($this->email)->send(new ForgotPassword($data));
+        else if ($type === 'nuevo')
+            Mail::to($this->email)->send(new confirmacion($data));
+    }
 
     // scopes
+    public function scopeSinProyectos($query)
+    {
+        return $query->whereDoesntHave('proyectos.foro', function (Builder $query) {
+            $query->Activo(true)->orWhere('promedio', '>', 69);
+        });
+    }
+    public function scopeMiEquipo($query, $folio)
+    {
+        return $query->whereHas('proyectos', function (Builder $query) use ($folio) {
+            $query->Buscar($folio);
+        });
+    }
     public function scopeDatosBasicos($query)
     {
-        return $query->select('users.id', 'num_control', 'prefijo', 'nombre', 'apellidoP', 'apellidoM');
+        return $query->select('users.id', 'num_control', 'prefijo', 'nombre', 'apellidoP', 'apellidoM', 'email');
     }
     public function scopeBuscar($query, $num_control)
     {

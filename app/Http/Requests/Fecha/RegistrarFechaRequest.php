@@ -2,8 +2,11 @@
 
 namespace App\Http\Requests\Fecha;
 
-use Carbon\Carbon;
+use App\Foro;
 use App\FechaForo;
+use Carbon\Carbon;
+use App\Rules\ValidarFecha;
+use App\Rules\ValidarHora;
 use Illuminate\Foundation\Http\FormRequest;
 
 class RegistrarFechaRequest extends FormRequest
@@ -24,21 +27,22 @@ class RegistrarFechaRequest extends FormRequest
      * @return array
      */
     public function rules()
-    {
+    {        
         if ($this->getMethod() == 'POST') {
-            return [                
-                'fecha'     => 'required|unique:fechas_foros,fecha|date|after_or_equal:' . Carbon::now()->toDateString(),
+            $foro = Foro::Buscar($this->input('slug'))->firstOrFail();
+            return [
+                // 'fecha'     => 'required|unique:fechas_foros,fecha|date|after_or_equal:' . Carbon::now()->toDateString(),
+                'fecha'     => ['required', 'unique:fechas_foros,fecha', 'date', 'after_or_equal:' . Carbon::now()->toDateString(), new ValidarFecha($foro->periodo, $foro->anio)],
                 'hora_inicio'  => 'required|date_format:H:i',
-                'hora_termino'   => 'required|date_format:H:i|after:hora_inicio',
-                'slug'=>'exists:foros,slug'
+                'hora_termino'   => ['required','date_format:H:i','after:hora_inicio', new ValidarHora($this->input('hora_inicio'),$this->input('hora_termino'),$foro)],
+                'slug' => 'exists:foros,slug'
             ];
         } else if ($this->getMethod() == 'PUT') {
-            $fecha = FechaForo::Where('fecha', $this->fecha)->firstOrFail();
             return [                
-                'fecha'     => 'required|unique:fechas_foros,fecha,' . $fecha->id . '|date|after_or_equal:' . Carbon::now()->toDateString(), '|unique',
+                'fecha'     => ['required', 'unique:fechas_foros,fecha,' . $this->fechaforo->id, 'date', 'after_or_equal:' . Carbon::now()->toDateString(), new ValidarFecha($this->fechaforo->foro->periodo, $this->fechaforo->foro->anio)],
                 'hora_inicio'  => 'required|date_format:H:i',
                 'hora_termino'   => 'required|after:hora_inicio',
-                'slug'=>'exists:foros,slug'
+                'slug' => 'exists:foros,slug'
             ];
         }
     }

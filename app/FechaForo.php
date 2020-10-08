@@ -17,27 +17,24 @@ class FechaForo extends Model
         'id', 'foro_id'
     ];
 
-    public function foro()
+    public function getRouteKeyName()
     {
-        // return $this->belongsTo(Foro::class, 'foros_id');
+        return 'fecha';
+    }
+    public function foro()
+    {        
         return $this->belongsTo(Foro::class);
     }
     public function recesos()
-    {        
-        // return $this->hasMany(HorarioBreak::class, 'fechaforo_id');
+    {                
         return $this->hasMany(Receso::class);
-    }
-    // public function horario_jurado()
-    // public function horarioJurado()
+    }    
     public function horarios()
-    {
-        // return $this->hasMany('App\HorarioJurado', 'fechas_foros_id');
-        // return $this->hasMany('App\HorarioJurado', 'fechaforo_id');
+    {        
         return $this->hasMany(Horario::class);
     }
     public function horarioIntervalos($minutos, $what, $recesos)    
-    {
-        // en vez de horarioIntervalos, solo intervalos
+    {        
         $aux_inicio = date('H:i', strtotime($this->hora_inicio));
         $aux_termino = date('H:i', strtotime($this->hora_termino));
         $intervalo = array();

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Administrador;
+namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 
@@ -71,13 +71,8 @@ class LineaController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($clave)
-    {
-        // scope buscar por clave tal vez
-        $linea = LineaDeInvestigacion::Buscar($clave)->with('proyectos')->first();
-        // where('clave', $clave)->with('proyectos')->first();
-        if(is_null($linea))
-            return response()->json(['message'=>'Linea de inv. no encontrada'], 404);
+    public function destroy(LineaDeInvestigacion $linea)
+    {        
         if ($linea->proyectos->count())
             return response()->json(['message' => 'No se puede eliminar el registro'], 400);
         $linea->delete();

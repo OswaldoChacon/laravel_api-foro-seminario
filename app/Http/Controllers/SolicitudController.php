@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Administrador;
+namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Solicitud\RegistrarSolicitudRequest;
@@ -34,12 +34,11 @@ class SolicitudController extends Controller
         $solicitud->save();
         return response()->json(['message'=>'Registro actualizado'], 200);
     }
-    public function destroy($solicitud)
-    {
-        $solicitud = TipoDeSolicitud::where('nombre_', $solicitud)->firstOrFail();
-        if($solicitud->notificaciones->count())
+    public function destroy(TipoDeSolicitud $solicitude)
+    {        
+        if($solicitude->notificaciones->count())
             return response()->json(['message' => 'No se puede eliminar el registro'], 400);
-        $solicitud->delete();        
+        $solicitude->delete();        
         return response()->json(['message'=>'Registro eliminado'], 200);
     }
 }

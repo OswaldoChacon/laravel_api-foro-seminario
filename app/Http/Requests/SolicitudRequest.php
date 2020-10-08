@@ -24,7 +24,7 @@ class SolicitudRequest extends FormRequest
     public function rules()
     {
         return [
-            'tipo_solicitud'=>'required|exists:tipos_solicitud,nombre_',
+            'tipo_solicitud'=>'required|exists:tipos_de_solicitud,nombre_',
             'motivo'=>'required|string'
             //
         ];

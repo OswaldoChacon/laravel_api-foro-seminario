@@ -40,7 +40,7 @@ class RegistrarProyectoRequest extends FormRequest
                 'empresa' => 'required|max:255',
                 'linea' => 'required|exists:lineas_de_investigacion,clave',
                 'tipo' => 'required|exists:tipos_de_proyecto,clave',
-                'asesor' => 'required|exists:users,num_control',
+                'asesor' => 'exists:users,num_control',
             ];
         }
     }

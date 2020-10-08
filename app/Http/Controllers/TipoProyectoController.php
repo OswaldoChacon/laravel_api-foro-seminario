@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Administrador;
+namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 
@@ -31,7 +31,7 @@ class TipoProyectoController extends Controller
     {
         $tipoDeProyecto = new TipoDeProyecto();
         $tipoDeProyecto->fill($request->all())->save();
-        return response()->json(['message' => 'Tipo de proyecto registrado'], 200);
+        return response()->json(['message' => 'Registro agregado'], 200);
     }
 
     /**
@@ -58,7 +58,7 @@ class TipoProyectoController extends Controller
         if(is_null($tipoDeProyecto))
             return response()->json(['message' => 'Tipo de proyecto no encontrado'], 404);
         $tipoDeProyecto->fill($request->all())->save();
-        return response()->json(['message' => 'Tipo de proyecto actualizado'], 200);     
+        return response()->json(['message' => 'Registro actualizado'], 200);     
     }
 
     /**
@@ -67,14 +67,11 @@ class TipoProyectoController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($clave)
-    {
-        $tipoDeProyecto = TipoDeProyecto::where('clave', $clave)->with('proyectos')->first();
-        if(is_null($tipoDeProyecto))
-            return response()->json(['message' => 'Tipo de proyecto no encontrado'], 404);
-        if ($tipoDeProyecto->proyectos->count())
+    public function destroy(TipoDeProyecto $tiposProyecto)
+    {        
+        if ($tiposProyecto->proyectos->count())
             return response()->json(['message' => 'No se puede eliminar el registro'], 400);
-        $tipoDeProyecto->delete();
-        return response()->json(['message' => 'Tipo de proyecto eliminado'], 200);     
+        $tiposProyecto->delete();
+        return response()->json(['message' => 'Registro eliminado'], 200);     
     }
 }

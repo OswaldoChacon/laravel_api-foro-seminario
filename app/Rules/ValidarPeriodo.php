@@ -11,9 +11,10 @@ class ValidarPeriodo implements Rule
      *
      * @return void
      */
-    public function __construct()
+    public function __construct($anio)
     {
         //
+        $this->anio = $anio;
     }
 
     /**
@@ -26,6 +27,15 @@ class ValidarPeriodo implements Rule
     public function passes($attribute, $value)
     {
         //
+        if ($this->anio == date('Y')) {
+            $meses = array("ENERO", "FEBRERO", "MARZO", "ABRIL", "MAYO", "JUNIO", "JULIO", "AGOSTO", "SEPTIEMBRE", "OCTUBRE", "NOVIEMBRE", "DICIEMBRE");
+            $mesesPeriodo = explode('-', $value);
+            $mesActual = date('m');
+            if ((array_search($mesesPeriodo[0], $meses) + 1) < $mesActual && $mesActual <= (array_search($mesesPeriodo[1], $meses) + 1))
+                return true;
+            else return false;
+        }
+        return true;
     }
 
     /**
@@ -35,6 +45,6 @@ class ValidarPeriodo implements Rule
      */
     public function message()
     {
-        return 'The validation error message.';
+        return 'El periodo seleccionado esta fuera de tiempo';
     }
 }

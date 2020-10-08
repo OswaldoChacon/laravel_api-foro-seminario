@@ -86,13 +86,11 @@ class Main
             $this->ants[] = new Ant($i, $this->problema);
         }
 
-        $this->cList = $this->problema->timeslots;
-        //prueba chaqueta
+        $this->cList = $this->problema->timeslots;        
         for ($j = 0; $j < sizeof($this->cList); $j++) {
             $this->ViolacionesSuavesTotal[] = 0;
         }
-        // dd($this->ViolacionesSuavesTotal);
-        //prueba chaqueta
+        // dd($this->ViolacionesSuavesTotal);        
         foreach ($this->ants as $ant) {
             for ($j = 0; $j < sizeof($this->cList); $j++) {
                 $ant->cListAlready[] = false;
@@ -435,6 +433,7 @@ class Main
         $this->penalizarEmpalmeMaestro($this->currentLocalBest);
         $this->contarViolacionesSuaves($this->currentLocalBest);
         if ($this->currentLocalBest->intViolacionesDuras > 0) {
+            return response()->json(['message'=>'error al generar horario'], 400);
             dd("error 436");
         } else {
             $this->eventosProgramados = array();

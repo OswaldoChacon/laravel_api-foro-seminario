@@ -4,7 +4,7 @@ namespace App\Http\Requests\Fecha;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Carbon\Carbon;
-use App\Fechas_Foros;
+use App\FechaForo;
 
 class EditarFechaRequest extends FormRequest
 {
@@ -25,7 +25,7 @@ class EditarFechaRequest extends FormRequest
      */
     public function rules()
     {
-        $fecha = Fechas_Foros::Where('fecha',$this->fecha)->firstOrFail();
+        $fecha = FechaForo::Where('fecha',$this->fecha)->firstOrFail();
         return [
             //
             'fecha'     => 'required|unique:fechas_foros,fecha,'.$fecha->id.'|date|after_or_equal:' . Carbon::now()->toDateString(), '|unique',
