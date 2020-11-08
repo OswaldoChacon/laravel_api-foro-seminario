@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use  JWTAuth;
+use JWTAuth;
 use App\User;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
@@ -10,7 +10,7 @@ use App\Http\Requests\CambiarPasswordRequest;
 use App\Http\Requests\Usuario\RegistrarUsuarioRequest;
 
 class AuthController extends Controller
-{    
+{
     public function login(Request $request)
     {
         $input = $request->only('email', 'password');
@@ -21,17 +21,17 @@ class AuthController extends Controller
                 'message' => 'Correo o contraseña no válidos.',
             ], 404);
         }
-        $usuario = User::where('email',$request->email)->first();                        
+        $usuario = User::where('email', $request->email)->first();
         if (!$usuario->hasAnyRole($usuario->roles())) {
             return response()->json(['titulo' => 'Acceso denegado', 'message' => 'No tiene ningún rol asignado'], 403);
         }
-        if(!$usuario->acceso) {
+        if (!$usuario->acceso) {
             $usuario->acceso = 1;
             $usuario->save();
         }
         return  response()->json([
             'token' => $jwt_token,
-            'profile' => $usuario            
+            'profile' => $usuario
         ]);
     }
     public function restablecerPassword(Request $request)
@@ -39,7 +39,7 @@ class AuthController extends Controller
         $request->validate([
             'email' => 'email|exists:users,email'
         ]);
-        $usuario = User::where('email',$request->email)->first();
+        $usuario = User::where('email', $request->email)->first();
         $password = Str::random(10);
         $usuario->password = bcrypt($password);
         $usuario->save();
@@ -77,5 +77,4 @@ class AuthController extends Controller
         $usuarioLogueado->save();
         return response()->json(['message' => 'Datos actualizados'], 200);
     }
-
 }

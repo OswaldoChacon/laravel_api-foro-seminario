@@ -16,26 +16,26 @@ class AuthJWT
      * @param  \Closure  $next
      * @return mixed
      */
-    public function handle($request, Closure $next,...$roles)
+    public function handle($request, Closure $next, ...$roles)
     {
         try {
-            $user = JWTAuth::parseToken()->authenticate();            
+            $user = JWTAuth::parseToken()->authenticate();
         } catch (Exception $e) {
-            if ($e instanceof \Tymon\JWTAuth\Exceptions\TokenInvalidException){
-                return response()->json(['mensaje' => 'Token is Invalid'],401);
-            }else if ($e instanceof \Tymon\JWTAuth\Exceptions\TokenExpiredException){
-                return response()->json(['mensaje' => 'Token is Expired'],401);
-            }else{
-                return response()->json(['mensaje' => 'Authorization Token not found'],401);
+            if ($e instanceof \Tymon\JWTAuth\Exceptions\TokenInvalidException) {
+                return response()->json(['mensaje' => 'Token is Invalid'], 401);
+            } else if ($e instanceof \Tymon\JWTAuth\Exceptions\TokenExpiredException) {
+                return response()->json(['mensaje' => 'Token is Expired'], 401);
+            } else {
+                return response()->json(['mensaje' => 'Authorization Token not found'], 401);
             }
         }
-        foreach($roles as $role) {
+        foreach ($roles as $role) {
             // Check if user has the role This check will depend on how your roles are set up
-            if($user->hasRole($role))
+            if ($user->hasRole($role))
                 return $next($request);
         }
-        return response()->json(['message'=>'No autorizado'], 403);
-    
+        return response()->json(['message' => 'No autorizado'], 403);
+
         // return $next($request);
     }
 }
