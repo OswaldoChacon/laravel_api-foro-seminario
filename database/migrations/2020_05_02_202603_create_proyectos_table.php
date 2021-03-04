@@ -21,7 +21,7 @@ class CreateProyectosTable extends Migration
             $table->string('objetivo');
             $table->unsignedInteger('linea_de_investigacion_id');
             $table->foreign('linea_de_investigacion_id')->references('id')->on('lineas_de_investigacion')->onDelete('cascade');
-            $table->unsignedInteger('tipo_deproyecto_id');
+            $table->unsignedInteger('tipo_de_proyecto_id');
             $table->foreign('tipo_de_proyecto_id')->references('id')->on('tipos_de_proyecto')->onDelete('cascade');
             $table->unsignedInteger('foro_id');
             $table->foreign('foro_id')->references('id')->on('foros')->onDelete('cascade');
