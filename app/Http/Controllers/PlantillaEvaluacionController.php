@@ -10,7 +10,11 @@ use Illuminate\Http\Request;
 class PlantillaEvaluacionController extends Controller
 {
     public function index(Request $request){
-        $Plantillas = Plantilla::paginate(7);
+        $PlantillasTable = Plantilla::query();
+        if ($request->nombre){
+            $PlantillasTable->where('nombre', 'like', '%' . $request->nombre . '%');
+        }
+        $Plantillas = $PlantillasTable->paginate(7);
         return response()->json($Plantillas, 200);
     }
 
@@ -31,16 +35,5 @@ class PlantillaEvaluacionController extends Controller
     { 
         $plantilla = Plantilla::find($id)->delete();
         return response()->json(['message' => 'Registro eliminado'], 200);     
-    }
-
-
-    private function createPlantilla($plantillaData){
-        return;
-    }
-    private function createGrupo($grupoData){
-        return;
-    }
-    private function createConcepto($conceptoData){
-        return;
     }
 }

@@ -42,8 +42,8 @@ Route::group(['middleware' => ['jwtAuth:Alumno,Administrador,Docente']], functio
     Route::delete('eliminar_integrante', 'AlumnoController@eliminarIntegrante');
 
     Route::get('mis_proyectos', 'UsuariosController@misProyectos');
-    //Plantillas
-    // Route::get('plantillas','PlantillaEvaluacionController@index');
-    // Route::put('plantillas','PlantillaEvaluacionController@update');
+
+    Route::apiResource('plantillas/grupos','GrupoController');
     Route::apiResource('plantillas','PlantillaEvaluacionController');
+    
 });
