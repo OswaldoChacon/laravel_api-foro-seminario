@@ -7,15 +7,17 @@ use Illuminate\Http\Request;
 
 class GrupoController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function index(Request $request)
+ 
+    public function grupos(Request $request, $id)
     {
-        $grupos = Grupo::where('plantilla_id', $request->id)->paginate(7);
-        return response()->json($grupos, 200);
+        $GrupoTable = Grupo::query();
+        if ($request->nombre){
+            $GrupoTable->where('nombre', 'like', '%' . $request->nombre . '%')
+                       ->where('plantilla_id', $id);
+        }
+        $GrupoTable = Grupo::where('plantilla_id', $id);
+        $grupos = $GrupoTable->paginate(7);
+        return response()->json(['grupos' => $grupos, 'plantilla_id' => $id], 200);
     }
 
     /**
@@ -35,8 +37,10 @@ class GrupoController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function store(Request $request)
-    {
-        //
+    {;
+        $Grupo = new Grupo;
+        $Grupo->fill($request->all())->save();
+        return response()->json(['message' => 'Grupo creado'], 200);
     }
 
     /**

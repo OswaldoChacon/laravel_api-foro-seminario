@@ -13,4 +13,6 @@ class Grupo extends Model
     {
         return $this->belongsTo(Plantilla::class);
     }
+
+    
 }

@@ -40,10 +40,12 @@ Route::group(['middleware' => ['jwtAuth:Alumno,Administrador,Docente']], functio
     Route::put('responder_notificacion/{proyecto}', 'UsuariosController@responderNotificacion');
     Route::post('agregar_integrante', 'AlumnoController@agregarIntegrante');
     Route::delete('eliminar_integrante', 'AlumnoController@eliminarIntegrante');
-
     Route::get('mis_proyectos', 'UsuariosController@misProyectos');
 
-    Route::apiResource('plantillas/grupos','GrupoController');
-    Route::apiResource('plantillas','PlantillaEvaluacionController');
+    Route::get('plantillas/grupos/{id}', 'GrupoController@grupos');
+    Route::apiResource('plantillas/grupos','GrupoController')->except('index');
+    Route::apiResource('plantillas','PlantillaEvaluacionController')->except('show');
+    
+    
     
 });
