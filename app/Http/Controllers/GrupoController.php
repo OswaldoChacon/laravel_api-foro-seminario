@@ -37,7 +37,7 @@ class GrupoController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function store(Request $request)
-    {;
+    {
         $Grupo = new Grupo;
         $Grupo->fill($request->all())->save();
         return response()->json(['message' => 'Grupo creado'], 200);
@@ -72,9 +72,12 @@ class GrupoController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
-    {
-        //
+    public function update($id, Request $request){
+        $grupo = Grupo::find($id);
+        $grupo->nombre = $request->nombre;
+        $grupo->ponderacion = $request->ponderacion;
+        $grupo->save();
+        return response()->json(['message' => 'Grupo actualizado'], 200);
     }
 
     /**
@@ -85,6 +88,7 @@ class GrupoController extends Controller
      */
     public function destroy($id)
     {
-        //
+        Grupo::find($id)->delete();
+        return response()->json(['message' => 'Registro eliminado'], 200);   
     }
 }

@@ -14,5 +14,14 @@ class Grupo extends Model
         return $this->belongsTo(Plantilla::class);
     }
 
+    function getConceptoAttribute(){
+        $concepto = true;
+        return $concepto;
+    }
+    
+    protected $appends = [
+        'Concepto',
+    ];
+
     
 }
