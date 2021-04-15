@@ -4,7 +4,7 @@ namespace App\Http\Requests\Linea;
 
 use App\LineaDeInvestigacion;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
+
 
 class RegistrarLineaRequest extends FormRequest
 {
@@ -26,9 +26,16 @@ class RegistrarLineaRequest extends FormRequest
      */
     public function rules()
     {
-        return [
-            'clave' => ['required', Rule::unique('lineas_de_investigacion')->ignore($this->linea)],
-            'nombre' => ['required', Rule::unique('lineas_de_investigacion')->ignore($this->linea)]
-        ];
+        if ($this->getMethod() == 'POST') {
+            return [
+                'clave' => 'required|unique:lineas_de_investigacion,clave',
+                'nombre' => 'required|unique:lineas_de_investigacion,nombre',
+            ];
+        } else if ($this->getMethod() == 'PUT') {
+            return [
+                'clave' => 'required|unique:lineas_de_investigacion,clave,' . $this->linea->id,
+                'nombre' => 'required|unique:lineas_de_investigacion,nombre,' . $this->linea->id
+            ];
+        }
     }
 }
