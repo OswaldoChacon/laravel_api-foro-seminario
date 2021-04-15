@@ -4,6 +4,7 @@ namespace App\Http\Requests\Tipos;
 
 use App\TipoDeProyecto;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class RegistrarTiposRequest extends FormRequest
 {
@@ -24,16 +25,9 @@ class RegistrarTiposRequest extends FormRequest
      */
     public function rules()
     {
-        if ($this->getMethod() == 'POST') {
-            return [                
-                'clave' => 'required|unique:tipos_de_proyecto,clave',
-                'nombre' => 'required|unique:tipos_de_proyecto,nombre'
-            ];
-        } else if ($this->getMethod() == 'PUT') {            
-            return [
-                'clave' => 'required|unique:tipos_de_proyecto,clave,' . $this->tiposProyecto->id,
-                'nombre' => 'required|unique:tipos_de_proyecto,nombre,' . $this->tiposProyecto->id
-            ];
-        }
+        return [
+            'clave' => ['required', Rule::unique('tipos_de_proyecto')->ignore($this->tiposProyecto)],
+            'nombre' => ['required', Rule::unique('tipos_de_proyecto')->ignore($this->tiposProyecto)]
+        ];
     }
 }
