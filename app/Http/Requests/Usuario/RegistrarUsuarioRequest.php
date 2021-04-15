@@ -4,6 +4,7 @@ namespace App\Http\Requests\Usuario;
 
 use App\User;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class RegistrarUsuarioRequest extends FormRequest
 {
@@ -23,20 +24,10 @@ class RegistrarUsuarioRequest extends FormRequest
      * @return array
      */
     public function rules()
-    {
-
-        if ($this->getMethod() == 'POST') {
-            $rules = [
-                'email' => 'required|unique:users,email',
-                'num_control' => 'required|unique:users,num_control',
-            ];
-        }
-        if ($this->getMethod() == 'PUT') {            
-            $rules = [
-                'num_control' => 'required|unique:users,num_control,' . $this->usuario->id,
-                'email' => 'required|unique:users,email,' . $this->usuario->id,
-            ];
-        }
-        return $rules;
+    {        
+        return [
+            'email' => ['required', Rule::unique('users')->ignore($this->usuario)],
+            'num_control' => ['required', Rule::unique('users')->ignore($this->usuario)],
+        ];     
     }
 }
