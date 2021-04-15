@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Concepto;
 use Illuminate\Http\Request;
 
 class ConceptoController extends Controller
