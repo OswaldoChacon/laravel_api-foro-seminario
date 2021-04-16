@@ -14,7 +14,7 @@ class AddBoolToConceptosTable extends Migration
     public function up()
     {
         Schema::table('conceptos', function (Blueprint $table) {
-            $table->boolean('semiario')->after('grupo_id');
+            $table->boolean('seminario')->after('grupo_id');
         });
     }
 
@@ -26,7 +26,7 @@ class AddBoolToConceptosTable extends Migration
     public function down()
     {
         Schema::table('conceptos', function (Blueprint $table) {
-            $table->dropColumn('semiario');
+            $table->dropColumn('seminario');
         });
     }
 }

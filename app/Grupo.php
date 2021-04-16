@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Grupo extends Model
 {
-    protected $fillable = ['plantilla_id','nombre','ponderacion'];
+    protected $fillable = ['plantilla_id','nombre','ponderacion','seminario'];
 
     public function plantilla()
     {

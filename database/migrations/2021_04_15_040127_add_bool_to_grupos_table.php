@@ -14,7 +14,7 @@ class AddBoolToGruposTable extends Migration
     public function up()
     {
         Schema::table('grupos', function (Blueprint $table) {
-            $table->boolean('semiario')->after('plantilla_id');
+            $table->boolean('seminario')->after('plantilla_id');
         });
     }
 
@@ -26,7 +26,7 @@ class AddBoolToGruposTable extends Migration
     public function down()
     {
         Schema::table('grupos', function (Blueprint $table) {
-            $table->dropColumn('semiario');
+            $table->dropColumn('seminario');
         });
     }
 }
