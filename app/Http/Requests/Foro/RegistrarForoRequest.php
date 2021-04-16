@@ -41,9 +41,10 @@ class RegistrarForoRequest extends FormRequest
                     // 'min:' . date('Y'),
                     'max:' . (date('Y') + 2), 'unique:foros,anio,' . $this->id . ',id,periodo,' . $this->input('periodo')
                 ],
-                'fecha_limite' => ['required', 'date', 
+                'fecha_limite' => ['date', 
                 // 'after_or_equal:' . Carbon::now()->toDateString(), 
-                new ValidarFecha($this->input('periodo'), $this->input('anio'))]
+                // new ValidarFecha($this->input('periodo'), $this->input('anio'))
+                ]
             ];
         } else if ($this->getMethod() == 'PUT') {
             return [
@@ -57,9 +58,10 @@ class RegistrarForoRequest extends FormRequest
                     // 'min:' . date('Y'), 
                     'max:' . (date('Y') + 2), 'unique:foros,anio,' . $this->foro->id . ',id,periodo,' . $this->input('periodo')
                 ],
-                'fecha_limite' => ['required', 'date', 
+                'fecha_limite' => ['date', 
                 // 'after_or_equal:' . Carbon::now()->toDateString(), 
-                new ValidarFecha($this->input('periodo'), $this->input('anio'))]
+                // new ValidarFecha($this->input('periodo'), $this->input('anio'))
+                ]
 
             ];
         }
