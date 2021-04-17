@@ -13,9 +13,10 @@ class CreateTiposDeSolicitudTable extends Migration
      */
     public function up()
     {
-        Schema::create('tipos_de_solicitud', function (Blueprint $table) {            
+        Schema::create('tipos_de_solicitud', function (Blueprint $table) {
             $table->increments('id');
-            $table->string('nombre_');            
+            $table->string('clave')->unique();
+            $table->string('nombre_')->unique();
         });
     }
 
