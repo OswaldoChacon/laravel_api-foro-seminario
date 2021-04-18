@@ -15,6 +15,7 @@ class CreateGruposTable extends Migration
     {
         Schema::create('grupos', function (Blueprint $table) {
             $table->id();
+            $table->boolean('activo')->default(false);
             $table->string('nombre');
             $table->integer('ponderacion');
             $table->foreignId('plantilla_id')->constrained('plantillas');

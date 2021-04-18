@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreatePlantillaTable extends Migration
+class CreatePlantillasTable extends Migration
 {
     /**
      * Run the migrations.
@@ -15,6 +15,7 @@ class CreatePlantillaTable extends Migration
     {
         Schema::create('plantillas', function (Blueprint $table) {
             $table->id();
+            $table->boolean('activo')->default(false);
             $table->string('nombre');
             $table->timestamps();
         });
