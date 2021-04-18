@@ -3,24 +3,27 @@
 namespace App;
 
 use App\Grupo;
+use App\Traits\TraitActivoAttribute;
 use Illuminate\Database\Eloquent\Model;
 
 class Plantilla extends Model
 {
-    protected $table = "plantilla";
+    use TraitActivoAttribute;
+    // protected $table = "plantilla";
     protected $fillable = ['nombre'];
-    
+
+    protected $appends = [
+        'Grupo',  'canActivate'
+    ];
+
     public function grupos()
     {
         return $this->hasMany(Grupo::class);
     }
 
-    function getGrupoAttribute(){
+    function getGrupoAttribute()
+    {
         $grupo = true;
         return $grupo;
-    }
-    
-    protected $appends = [
-        'Grupo',
-    ];
+    }  
 }

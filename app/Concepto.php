@@ -2,18 +2,21 @@
 
 namespace App;
 
+use App\Traits\TraitActivoAttribute;
 use Illuminate\Database\Eloquent\Model;
 
 class Concepto extends Model
 {
-    protected $fillable = ['conceptos','ponderacion','grupo_id','seminario'];
+    use TraitActivoAttribute;
+    protected $fillable = ['conceptos', 'ponderacion', 'grupo_id', 'seminario'];
 
-    function getConceptoAttribute(){
+    function getConceptoAttribute()
+    {
         $concepto = true;
         return $concepto;
     }
-    
+
     protected $appends = [
-        'Concepto',
-    ];
+        'Concepto', 'canActivate'
+    ];    
 }
