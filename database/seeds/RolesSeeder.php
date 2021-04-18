@@ -1,6 +1,8 @@
 <?php
 
 use Illuminate\Database\Seeder;
+use App\User;
+use App\Rol;
 
 class RolesSeeder extends Seeder
 {
@@ -24,5 +26,6 @@ class RolesSeeder extends Seeder
             ]
         ];
         DB::table('roles')->insert($roles);
+        User::findOrFail(1)->roles()->attach(Rol::findOrFail(1));
     }
 }

@@ -13,16 +13,24 @@ class TiposSolicitudSeeder extends Seeder
     {
         $tipos = [
             [
-                // 'clave' => 'I',
-                'nombre' => 'TESIS',
+                // 'clave'=>'TIPO-1',
+                'nombre_' => 'REGISTRO DE PROYECTO'
             ],
             [
-                // 'clave' => 'DT',
-                'nombre' => 'DESARROLLO TECNOLÓGICO (RESIDENCIA PROFESIONAL)',
+                // 'clave'=>'TIPO-2',
+                'nombre_' => 'CAMBIO DE ASESOR'
             ],
             [
-                // 'clave' => 'IT',
-                'nombre' => 'INNOVACIÓN TECNOLÓGICA',
+                // 'clave'=>'TIPO-3',
+                'nombre_' => 'CAMBIO DE TITULO DEL PROYECTO'
+            ],
+            [
+                // 'clave'=>'TIPO-4',
+                'nombre_' => 'CANCELACION DEL PROYECTO'
+            ],
+            [
+                // 'clave'=>'TIPO-5',
+                'nombre_' => 'DAR DE BAJA A UN INTEGRANTE'
             ]
         ];
         DB::table('tipos_de_solicitud')->insert($tipos);
