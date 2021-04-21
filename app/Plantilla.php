@@ -4,11 +4,12 @@ namespace App;
 
 use App\Grupo;
 use App\Traits\TraitActivoAttribute;
+use App\Traits\TraitCreatedAtAttribute;
 use Illuminate\Database\Eloquent\Model;
 
 class Plantilla extends Model
 {
-    use TraitActivoAttribute;
+    use TraitActivoAttribute, TraitCreatedAtAttribute;
     // protected $table = "plantilla";
     protected $fillable = ['nombre'];
 
@@ -25,5 +26,5 @@ class Plantilla extends Model
     {
         $grupo = true;
         return $grupo;
-    }  
+    }
 }

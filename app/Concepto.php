@@ -3,11 +3,13 @@
 namespace App;
 
 use App\Traits\TraitActivoAttribute;
+use App\Traits\TraitCreatedAtAttribute;
 use Illuminate\Database\Eloquent\Model;
 
 class Concepto extends Model
 {
-    use TraitActivoAttribute;
+    // use TraitActivoAttribute;
+    use TraitCreatedAtAttribute;
     protected $fillable = ['conceptos', 'ponderacion', 'grupo_id', 'seminario'];
 
     function getConceptoAttribute()

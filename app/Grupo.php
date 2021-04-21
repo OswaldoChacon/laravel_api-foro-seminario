@@ -4,15 +4,17 @@ namespace App;
 
 use App\Plantilla;
 use App\Traits\TraitActivoAttribute;
+use App\Traits\TraitCreatedAtAttribute;
 use Illuminate\Database\Eloquent\Model;
 
 class Grupo extends Model
 {
-    use TraitActivoAttribute;
-    protected $fillable = ['plantilla_id', 'nombre', 'ponderacion', 'seminario'];
+    // use TraitActivoAttribute;
+    use TraitCreatedAtAttribute;
+    protected $fillable = ['nombre', 'ponderacion', 'seminario'];
 
     protected $appends = [
-        'Concepto', 'canActivate'
+        'Concepto'
     ];
 
     public function plantilla()
