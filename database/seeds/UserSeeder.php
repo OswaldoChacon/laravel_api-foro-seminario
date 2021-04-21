@@ -19,7 +19,7 @@ class UserSeeder extends Seeder
                 'apellidoP'=>'admin',
                 'apellidoM'=>'admin',
                 'prefijo'=>'admin',
-                'email'=>'admin@admin.com',
+                'email'=>'admin@gmail.com',
                 'password'=>'$2y$10$EASJqhjcNpFHQ3wOnuuLd.YeeN8Bu9X9Yp5N3Id2/GEjSaKmAzgPi',
                 'num_control'=>'15270717',
                 // 'created_at' => Carbon::now(),
