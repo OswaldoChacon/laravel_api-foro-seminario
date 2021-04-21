@@ -3,31 +3,23 @@
 namespace App\Http\Controllers;
 
 use App\Grupo;
+use App\Http\Requests\GrupoRequest;
+use App\Plantilla;
 use Illuminate\Http\Request;
 
 class GrupoController extends Controller
 {
- 
-    public function grupos(Request $request, $id)
+
+    public function index(Request $request, $id)
     {
         $GrupoTable = Grupo::query();
-        if ($request->nombre){
+        if ($request->nombre) {
             $GrupoTable->where('nombre', 'like', '%' . $request->nombre . '%')
-                       ->where('plantilla_id', $id);
+                ->where('plantilla_id', $id);
         }
         $GrupoTable = Grupo::where('plantilla_id', $id);
         $grupos = $GrupoTable->paginate(7);
         return response()->json(['grupos' => $grupos, 'plantilla_id' => $id], 200);
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
     }
 
     /**
@@ -36,10 +28,11 @@ class GrupoController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(GrupoRequest $request, Plantilla $plantilla)
     {
-        $Grupo = new Grupo;
-        $Grupo->fill($request->all())->save();
+        $grupo = new Grupo;
+        $grupo->fill($request->all());
+        $grupo->plantilla()->associate($plantilla)->save();
         return response()->json(['message' => 'Grupo creado'], 200);
     }
 
@@ -55,28 +48,15 @@ class GrupoController extends Controller
     }
 
     /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function edit($id)
-    {
-        //
-    }
-
-    /**
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update($id, Request $request){
-        $grupo = Grupo::find($id);
-        $grupo->nombre = $request->nombre;
-        $grupo->ponderacion = $request->ponderacion;
-        $grupo->save();
+    public function update(GrupoRequest $request, Plantilla $plantilla, Grupo $grupo)
+    {
+        $grupo->update($request->all());
         return response()->json(['message' => 'Grupo actualizado'], 200);
     }
 
@@ -86,9 +66,9 @@ class GrupoController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(Grupo $grupo)
     {
-        Grupo::find($id)->delete();
-        return response()->json(['message' => 'Registro eliminado'], 200);   
+        $grupo->delete();
+        return response()->json(['message' => 'Registro eliminado'], 200);
     }
 }
