@@ -14,7 +14,7 @@ class AddBoolToGruposTable extends Migration
     public function up()
     {
         Schema::table('grupos', function (Blueprint $table) {
-            $table->boolean('seminario')->after('plantilla_id');
+            // $table->boolean('seminario')->after('plantilla_id');
         });
     }
 

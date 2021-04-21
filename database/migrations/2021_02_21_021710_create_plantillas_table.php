@@ -16,7 +16,7 @@ class CreatePlantillasTable extends Migration
         Schema::create('plantillas', function (Blueprint $table) {
             $table->id();
             $table->boolean('activo')->default(false);
-            $table->string('nombre');
+            $table->string('nombre')->unique();
             $table->timestamps();
         });
     }
