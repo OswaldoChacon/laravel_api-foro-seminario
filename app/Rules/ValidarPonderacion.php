@@ -2,6 +2,7 @@
 
 namespace App\Rules;
 
+use App\Concepto;
 use App\Grupo;
 use App\Plantilla;
 use Illuminate\Contracts\Validation\Rule;
@@ -13,12 +14,12 @@ class ValidarPonderacion implements Rule
      *
      * @return void
      */
-    public function __construct(Plantilla $plantilla, $grupo, int $ponderacion)
+    public function __construct($plantillaGrupo, $grupoConcepto, int $ponderacion)
     {
         // $this->grupo = $grupo;
-        $this->plantilla = $plantilla;
+        $this->plantillaGrupo = $plantillaGrupo;
+        $this->grupoConcepto = $grupoConcepto;
         $this->ponderacion = $ponderacion;
-        $this->grupo = $grupo;
     }
 
     /**
@@ -30,10 +31,13 @@ class ValidarPonderacion implements Rule
      */
     public function passes($attribute, $value)
     {
-        $this->ponderacion += $this->plantilla->grupos->sum('ponderacion') - $this->grupo->ponderacion;        
-        if ($this->ponderacion > 100)
-            return false;
-        return true;
+        if ($this->plantillaGrupo instanceof Plantilla)
+            $this->ponderacion += $this->plantillaGrupo->grupos->sum('ponderacion');
+        else if ($this->plantillaGrupo instanceof Grupo)
+            $this->ponderacion += $this->plantillaGrupo->conceptos->sum('ponderacion');
+        if ($this->grupoConcepto)
+            $this->ponderacion -= $this->grupoConcepto->ponderacion;
+        return $this->ponderacion > 100 ? false : true;
     }
 
     /**
