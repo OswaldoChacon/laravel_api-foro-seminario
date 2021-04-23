@@ -22,6 +22,11 @@ class Grupo extends Model
         return $this->belongsTo(Plantilla::class);
     }
 
+    public function conceptos()
+    {
+        return $this->hasMany(Concepto::class);
+    }
+
     function getConceptoAttribute()
     {
         $concepto = true;

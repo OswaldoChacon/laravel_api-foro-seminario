@@ -10,15 +10,23 @@ class Concepto extends Model
 {
     // use TraitActivoAttribute;
     use TraitCreatedAtAttribute;
-    protected $fillable = ['conceptos', 'ponderacion', 'grupo_id', 'seminario'];
+    protected $fillable = [
+        'nombre', 'ponderacion', 'grupo_id',
+        // 'seminario'
+    ];
+
+    protected $appends = [
+        'Concepto'
+    ];
 
     function getConceptoAttribute()
     {
         $concepto = true;
         return $concepto;
-    }
+    }   
 
-    protected $appends = [
-        'Concepto', 'canActivate'
-    ];    
+    public function grupo()
+    {
+        return $this->belongsTo(Grupo::class);
+    }
 }
