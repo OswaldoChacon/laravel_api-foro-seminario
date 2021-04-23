@@ -2,7 +2,9 @@
 
 namespace App\Http\Requests;
 
+use App\Rules\ValidarPonderacion;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class ConceptoRequest extends FormRequest
 {
@@ -13,7 +15,7 @@ class ConceptoRequest extends FormRequest
      */
     public function authorize()
     {
-        return false;
+        return true;
     }
 
     /**
@@ -24,7 +26,8 @@ class ConceptoRequest extends FormRequest
     public function rules()
     {
         return [
-            //
+            'nombre' => ['required', Rule::unique('conceptos')->ignore($this->concepto)],
+            'ponderacion' => ['required', 'numeric', 'min:1', new ValidarPonderacion($this->grupo, $this->concepto, $this->ponderacion)]
         ];
     }
 }
