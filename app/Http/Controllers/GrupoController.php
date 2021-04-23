@@ -66,7 +66,7 @@ class GrupoController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Grupo $grupo)
+    public function destroy(Plantilla $plantilla, Grupo $grupo)
     {
         $grupo->delete();
         return response()->json(['message' => 'Registro eliminado'], 200);
