@@ -16,7 +16,7 @@ class CreateConceptosTable extends Migration
         Schema::create('conceptos', function (Blueprint $table) {
             $table->id();
             // $table->boolean('activo')->default(false);
-            $table->string('conceptos')->unique();
+            $table->string('nombre')->unique();
             $table->integer('ponderacion');
             $table->foreignId('grupo_id')->constrained();
             $table->timestamps();
