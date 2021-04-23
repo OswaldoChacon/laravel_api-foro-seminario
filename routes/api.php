@@ -46,5 +46,5 @@ Route::group(['middleware' => ['jwtAuth:Alumno,Administrador,Docente']], functio
     Route::get('plantillas/grupos/conceptos/{id}', 'ConceptoController@conceptos');
     Route::apiResource('plantillas','PlantillaController')->except('show');
     Route::apiResource('plantillas/{plantilla}/grupos','GrupoController');
-    Route::apiResource('plantillas/grupos/conceptos','ConceptoController');
+    Route::apiResource('grupos/{grupo}/conceptos','ConceptoController');
 });
