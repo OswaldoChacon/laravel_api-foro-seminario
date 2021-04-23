@@ -3,15 +3,18 @@
 namespace App\Http\Controllers;
 
 use App\Concepto;
+use App\Grupo;
+use App\Http\Requests\ConceptoRequest;
 use Illuminate\Http\Request;
 
 class ConceptoController extends Controller
 {
-    public function conceptos(Request $request, $id){
+    public function index(Request $request, $id)
+    {
         $conceptoTable = Concepto::query();
-        if ($request->nombre){
+        if ($request->nombre) {
             $conceptoTable->where('conceptos', 'like', '%' . $request->nombre . '%')
-                       ->where('grupo_id', $id);
+                ->where('grupo_id', $id);
         }
         $conceptoTable = Concepto::where('grupo_id', $id);
         $conceptos = $conceptoTable->paginate(7);
@@ -24,11 +27,13 @@ class ConceptoController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(ConceptoRequest $request, Grupo $grupo)
     {
-        $Concepto = new Concepto;
-        $Concepto->fill($request->all())->save();
-        return response()->json(['message' => 'Concepto guardado'], 200);
+        $concepto = new Concepto;
+        $concepto->fill($request->all());
+        $concepto->grupo()->associate($grupo)
+            ->save();
+        return response()->json(['message' => 'Concepto guardado'], 201);
     }
 
     /**
@@ -38,15 +43,17 @@ class ConceptoController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update($id, Request $request){
-        $Concepto = Concepto::find($id);
-        $Concepto->conceptos = $request->conceptos;
-        $Concepto->ponderacion = $request->ponderacion;
-        $Concepto->save();
+    public function update(Grupo $grupo, Concepto $concepto, ConceptoRequest $request)
+    {
+        // $Concepto = Concepto::find($id);
+        // $Concepto->conceptos = $request->conceptos;
+        // $Concepto->ponderacion = $request->ponderacion;
+        // $Concepto->save();
+        $concepto->update($request->all());
         return response()->json(['message' => 'Concepto actualizado'], 200);
     }
 
-     /**
+    /**
      * Remove the specified resource from storage.
      *
      * @param  int  $id
@@ -55,6 +62,6 @@ class ConceptoController extends Controller
     public function destroy($id)
     {
         Concepto::find($id)->delete();
-        return response()->json(['message' => 'Registro eliminado'], 200);   
+        return response()->json(['message' => 'Registro eliminado'], 200);
     }
 }
