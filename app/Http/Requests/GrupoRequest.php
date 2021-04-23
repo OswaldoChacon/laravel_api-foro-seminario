@@ -27,7 +27,7 @@ class GrupoRequest extends FormRequest
     {
         return [
             'nombre' => ['required', Rule::unique('grupos')->ignore($this->grupo)],
-            'ponderacion' => ['required', 'numeric', new ValidarPonderacion($this->plantilla, $this->grupo, $this->ponderacion)]
+            'ponderacion' => ['required', 'numeric', 'min:1',new ValidarPonderacion($this->plantilla, $this->grupo, $this->ponderacion)]
         ];
     }
 }
