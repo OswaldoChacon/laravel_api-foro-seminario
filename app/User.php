@@ -176,7 +176,7 @@ class User extends Authenticatable implements JWTSubject
     {
         $roles = array();
         foreach ($this->roles()->get() as $rol) {
-            array_push($roles, $rol->nombre_);
+            array_push($roles, strtolower($rol->nombre_));
         }
         if ($this->foros_users()->Activo(true)
             // where('activo', true)
