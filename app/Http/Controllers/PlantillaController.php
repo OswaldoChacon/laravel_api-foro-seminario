@@ -28,7 +28,6 @@ class PlantillaController extends Controller
 
     public function update(PlantillaRequest $request, Plantilla $plantilla)
     {
-        // $plantilla = Plantilla::find($id);
         $plantilla->nombre = $request->nombre;
         $plantilla->save();
         return response()->json(['message' => 'Plantilla actualizada'], 200);
@@ -38,5 +37,12 @@ class PlantillaController extends Controller
     {
         $plantilla->delete();
         return response()->json(['message' => 'Registro eliminado'], 200);
+    }
+
+    public function activar(Plantilla $plantilla,Request $request)
+    {
+        $plantilla->activo = $request->activo;
+        $plantilla->save();
+        return response()->json(['message' => 'Plantilla activada'], 200);
     }
 }

@@ -14,7 +14,7 @@ class Grupo extends Model
     protected $fillable = ['nombre', 'ponderacion', 'seminario'];
 
     protected $appends = [
-        'Concepto'
+        'Concepto', 'acceso'
     ];
 
     public function plantilla()
@@ -27,9 +27,13 @@ class Grupo extends Model
         return $this->hasMany(Concepto::class);
     }
 
-    function getConceptoAttribute()
+    public function getConceptoAttribute()
     {
         $concepto = true;
         return $concepto;
+    }
+    public function getAccesoAttribute()
+    {        
+        return $this->conceptos->sum('ponderacion') === 100 ? true : false;
     }
 }

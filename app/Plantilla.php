@@ -14,12 +14,19 @@ class Plantilla extends Model
     protected $fillable = ['nombre'];
 
     protected $appends = [
-        'Grupo',  'canActivate'
+        'Grupo',  
+        'acceso',
+        'canActivate'
     ];
 
     public function grupos()
     {
         return $this->hasMany(Grupo::class);
+    }
+
+    public function getAccesoAttribute()
+    {
+        return $this->grupos->sum('ponderacion') === 100 ? true : false;
     }
 
     function getGrupoAttribute()
