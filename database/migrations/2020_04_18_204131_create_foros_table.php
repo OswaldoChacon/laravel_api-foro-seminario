@@ -14,7 +14,7 @@ class CreateForosTable extends Migration
     public function up()
     {
         //
-        Schema::create('foros', function (Blueprint $table) {            
+        Schema::create('foros', function (Blueprint $table) {
             $table->increments('id');
             $table->string('slug')->unique();
             $table->integer('no_foro')->unique();
@@ -26,9 +26,9 @@ class CreateForosTable extends Migration
             $table->integer('num_maestros')->default(3);
             $table->integer('duracion')->default(30);
             $table->boolean('activo')->default(false);
-            $table->string('prefijo');            
+            $table->string('prefijo');
             $table->unsignedInteger('user_id');
-            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');            
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
             $table->date('fecha_limite')->nullable();
         });
     }

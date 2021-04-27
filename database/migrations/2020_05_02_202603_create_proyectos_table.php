@@ -25,7 +25,7 @@ class CreateProyectosTable extends Migration
             $table->foreign('tipo_de_proyecto_id')->references('id')->on('tipos_de_proyecto')->onDelete('cascade');
             $table->unsignedInteger('foro_id');
             $table->foreign('foro_id')->references('id')->on('foros')->onDelete('cascade');
-            $table->foreignId('seminario_id')->constrained('seminarios')->nullable();
+            // $table->foreignId('seminario_id')->constrained('seminarios')->nullable();
             $table->unsignedInteger('asesor_id')->nullable();
             $table->foreign('asesor_id')->references('id')->on('users')->onDelete('cascade');
             $table->boolean('enviado')->default(false);            

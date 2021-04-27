@@ -1,6 +1,5 @@
 <?php
 
-use App\User;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
@@ -13,16 +12,19 @@ class DatabaseSeeder extends Seeder
     public function run()
     {
         $this->call(UserSeeder::class);
+        $this->call(ForoSeeder::class);
         $this->call(RolesSeeder::class);
         $this->call(TiposProyectosSeeder::class);
         $this->call(TiposSolicitudSeeder::class);
         $this->call(LineaInvestigacionSeeder::class);
 
-        factory(User::class, 48)->create();
+        factory(App\User::class, 48)->create();
+        factory(App\Proyecto::class, 5)->create();
         App\User::all()->each(function ($user) {
-            $user->roles()->attach(
-                App\Rol::find(2)
-            );
+            $user->roles()->attach(App\Rol::find(2));
+        });
+        App\Proyecto::all()->each(function ($proyecto) {
+            $proyecto->asesor()->associate(App\User::find(1));
         });
     }
 }
