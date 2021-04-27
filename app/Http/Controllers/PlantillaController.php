@@ -39,9 +39,11 @@ class PlantillaController extends Controller
         return response()->json(['message' => 'Registro eliminado'], 200);
     }
 
-    public function activar(Plantilla $plantilla,Request $request)
+    public function activar(Plantilla $plantilla, Request $request)
     {
         $plantilla->activo = $request->activo;
+        if ($plantilla->grupos->sum('ponderacion') !== 100)
+            return response()->json(['message' => 'Error al activar la plantilla'], 400);
         $plantilla->save();
         return response()->json(['message' => 'Plantilla activada'], 200);
     }
