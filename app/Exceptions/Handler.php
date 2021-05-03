@@ -2,6 +2,7 @@
 
 namespace App\Exceptions;
 
+use Illuminate\Auth\Access\AuthorizationException;
 use Throwable;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -54,17 +55,19 @@ class Handler extends ExceptionHandler
     public function render($request, Throwable $exception)
     {
         if ($exception instanceof ModelNotFoundException) {
-            return response()->json(['message'=> 'Registro no encontrado.'
-        ], 404);
+            return response()->json([
+                'message' => 'Registro no encontrado.'
+            ], 404);
         }
         // else 
-        if ($exception instanceof NotFoundHttpException) {
+        else if ($exception instanceof NotFoundHttpException) {
             return response()->json([
                 'error' => 'Recurso no encontrado.'
             ], 404);
-        }
-        if($exception instanceof ValidationException)
-            return response()->json(['message'=>'Los datos proporcionados no son válidos.','errors' => $exception->validator->getMessageBag()], 422);
+        } else if ($exception instanceof ValidationException)
+            return response()->json(['message' => 'Los datos proporcionados no son válidos.', 'errors' => $exception->validator->getMessageBag()], 422);
+        else if ($exception instanceof AuthorizationException)
+            return response()->json(['message' => 'Proceso no autorizado.'], 403);
         return parent::render($request, $exception);
     }
 }

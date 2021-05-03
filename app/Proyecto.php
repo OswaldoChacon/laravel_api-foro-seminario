@@ -16,7 +16,7 @@ class Proyecto extends Model
     ];
     protected $hidden = [
         'id', 'linea_de_investigacion_id', 'tipo_de_proyecto_id', 'foro_id', 'asesor_id', 'pivot'
-    ];    
+    ];
     public function getRouteKeyName()
     {
         return 'folio';
@@ -64,8 +64,8 @@ class Proyecto extends Model
     {
         return $this->notificaciones()->ReceptorConRol('Docente')->get()->first()->respuesta;
     }
-
-    // getters        
+    
+    // getters
     public function getInTimeAttribute()
     {
         return Carbon::now()->toDateString() <= $this->foro->fecha_limite || $this->permitir_cambios;
@@ -120,7 +120,7 @@ class Proyecto extends Model
     public function getFolio(Foro $foro)
     {
         $folio = $foro->prefijo;
-        $concatFolio = $foro->proyectos()->count() + 1;
+        $concatFolio = $foro->proyectos()->count() + 1;        
         if ($concatFolio < 10)
             $folio .= "0";
         $folio .= $concatFolio;

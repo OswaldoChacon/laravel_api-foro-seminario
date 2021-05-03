@@ -66,7 +66,7 @@ class ProyectoController extends Controller
         $foro = $proyecto->foro;
         if (Carbon::now()->toDateString() > $foro->fecha_limite)
             return response()->json(['message' => 'Estas fuera de tiempo para realizar cambios a tu proyecto'], 400);
-        if($proyecto->aceptado && !$proyecto->permitir_cambios)
+        if ($proyecto->aceptado && !$proyecto->permitir_cambios)
             return response()->json(['message' => 'No esta autorizado para actualizar tu proyecto'], 400);
         $solicitud = TipoDeSolicitud::where('nombre_', 'Registro de proyecto')->first();
         $asesores = $proyecto->notificaciones()->ReceptorConRol('Docente')->where('tipo_de_solicitud_id', $solicitud->id)->get()->pluck('receptor_id')->toArray();
@@ -76,7 +76,7 @@ class ProyectoController extends Controller
                 return response()->json(['message' => 'El asesor que has elegido ya ha rechazado tu solicitud. Elige a otro asesor o espera a que acepte tu solicitud'], 400);
             $proyecto->asesor()->associate($asesor);
         }
-        
+
         $proyecto->fill($request->all());
         $proyecto->linea_de_investigacion()->associate(LineaDeInvestigacion::Buscar($request->linea)->first());
         $proyecto->tipo_de_proyecto()->associate(TipoDeProyecto::Buscar($request->tipo)->first());
@@ -90,8 +90,8 @@ class ProyectoController extends Controller
         }
         return response()->json(['message' => 'Datos del proyecto actualizado'], 200);
     }
-    public function eliminarProyecto(Proyecto $proyecto){
-
+    public function eliminarProyecto(Proyecto $proyecto)
+    {
     }
     public function proyectoParticipa(Request $request, $folio)
     {
@@ -117,7 +117,7 @@ class ProyectoController extends Controller
         $foro = $proyecto->foro;
         if (Carbon::now()->toDateString() > $foro->fecha_limite)
             return response()->json(['message' => 'No se puede editar el proyecto, fuera de tiempo'], 400);
-        if(!$proyecto->aceptado)
+        if (!$proyecto->aceptado)
             return response()->json(['message' => 'No puedes realizar esta acción si el proyecto no ha sido aceptado'], 400);
         $proyecto->permitir_cambios = $request->cambios;
         $proyecto->save();
@@ -133,6 +133,11 @@ class ProyectoController extends Controller
         if (is_null($proyecto))
             return response()->noContent();
         $proyecto->append('editar', 'enviar', 'cancelar', 'inTime');
+        return response()->json($proyecto, 200);
+    }
+
+    public function getProyecto(Proyecto $proyecto)
+    {
         return response()->json($proyecto, 200);
     }
 }

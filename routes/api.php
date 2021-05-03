@@ -48,4 +48,10 @@ Route::group(['middleware' => ['jwtAuth:Alumno,Administrador,Docente']], functio
     Route::put('plantillas/{plantilla}/activo','PlantillaController@activar');
     Route::apiResource('plantillas/{plantilla}/grupos','GrupoController');
     Route::apiResource('grupos/{grupo}/conceptos','ConceptoController');
+
+
+    // Codigo forzado
+    Route::get('proyecto/{proyecto}','ProyectoController@getProyecto');
+
+    Route::apiResource('demos','DemoController');
 });
