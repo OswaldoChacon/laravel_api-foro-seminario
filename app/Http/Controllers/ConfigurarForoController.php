@@ -35,11 +35,10 @@ class ConfigurarForoController extends Controller
             return response()->json(['message' => 'Algo mal ha ocurrido'], 200);
         }
     }
-    public function agregarMaestro(Request $request, $slug)
+    
+    public function agregarMaestro(Request $request, Foro $foro)
     {
-        $foro = Foro::Where('slug', $slug)->first();
-        if (is_null($foro))
-            return response()->json(['message' => 'Foro no encontrado'], 404);
+        // politicas
         // if (!$foro->activo)
         //     return response()->json(['message' => 'No puedes agregar maestros a un foro inactivo'], 400);
         // if (!$foro->inTime())
@@ -56,15 +55,14 @@ class ConfigurarForoController extends Controller
         $message = $request->agregar ? 'Maestro agregado' : 'Maestro eliminado';
         return response()->json(['message' => $message], 200);
     }
-    public function activarForo(Request $request, $slug)
+    public function activarForo(Request $request, Foro $foro)
     {
+        // formRequest
         $request->validate(['activo' => 'required|boolean']);
-        $foro = Foro::Buscar($slug)->first();
-        if (is_null($foro))
-            return response()->json(['message' => 'Foro no encontrado'], 404);
+        // politicas
         $foros = Foro::Where([
             ['activo', true],
-            ['slug', '!=', $slug]
+            ['slug', '!=', $foro->slug]
         ])->get();
         if ($request->activo && !$foros->isEmpty())
             return response()->json(['message' => 'No se permite tener dos foros activos'], 400);
@@ -83,6 +81,7 @@ class ConfigurarForoController extends Controller
         $message = $request->activo ? 'Foro activado' : 'Foro desactivado';
         return response()->json(['message' => $message], 200);
     }
+
     public function proyectos(Request $request, $slug)
     {
         $proyectosTable = Proyecto::query()->select('id', 'aceptado', 'folio', 'participa', 'titulo');
