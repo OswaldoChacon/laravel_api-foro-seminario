@@ -32,6 +32,7 @@ class FechaForoController extends Controller
      */
     public function store(RegistrarFechaRequest $request)
     {
+        // politicas
         $foro = Foro::Buscar($request->slug)->first();
         if (!$foro->activo)
             return response()->json(['message' => 'Foro inactivo'], 400);
@@ -52,7 +53,7 @@ class FechaForoController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function show(FechaForo $fechaforo)
-    {        
+    {
         return response()->json($fechaforo, 200);
     }
 
@@ -65,6 +66,7 @@ class FechaForoController extends Controller
      */
     public function update(RegistrarFechaRequest $request, FechaForo $fechaforo)
     {
+        // politicas
         $fecha = FechaForo::Where('fecha', $fechaforo->fecha)->first();
         if (is_null($fecha))
             return response()->json(['message' => 'Fecha no encontrada'], 404);
@@ -89,12 +91,15 @@ class FechaForoController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function destroy(FechaForo $fechaforo)
-    {                
+    {
+        // politicas
         $fechaforo->delete();
         return response()->json(['Success' => 'Fecha eliminada']);
     }
+
     public function agregarBreak(BreakRequest $request, $fecha)
     {
+        // politicas
         $fecha = FechaForo::Where('fecha', $fecha)->first();
         if (is_null($fecha))
             return response()->json(['message' => 'Fecha no encontrada'], 404);
@@ -114,6 +119,7 @@ class FechaForoController extends Controller
     }
     public function eliminarBreak(BreakRequest $request, $fecha)
     {
+        // politicas
         $fecha = FechaForo::Where('fecha', $fecha)->first();
         if (is_null($fecha))
             return response()->json(['message' => 'Fecha no encontrada'], 404);
