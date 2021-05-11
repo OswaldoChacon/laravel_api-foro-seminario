@@ -23,10 +23,10 @@ class ProyectoRequest extends FormRequest
      * @return array
      */
     public function rules()
-    {                
+    {
         return [
-            'titulo' => ['required', 'max:255', Rule::unique('proyectos')->ignore($this->demo)],
-            'objetivo' => ['required', 'max:255',Rule::unique('proyectos')->ignore($this->demo)],
+            'titulo' => ['required', 'max:255', Rule::unique('proyectos')->ignore($this->proyecto)],
+            'objetivo' => ['required', 'max:255', Rule::unique('proyectos')->ignore($this->proyecto)],
             'empresa' => ['required', 'max:255'],
             'linea' => ['required', 'exists:lineas_de_investigacion,clave'],
             'tipo' => ['required', 'exists:tipos_de_proyecto,clave'],

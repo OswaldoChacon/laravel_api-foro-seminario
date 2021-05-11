@@ -53,5 +53,5 @@ Route::group(['middleware' => ['jwtAuth:Alumno,Administrador,Docente']], functio
     // Codigo forzado
     Route::get('proyecto/{proyecto}','ProyectoController@getProyecto');
 
-    Route::apiResource('demos','DemoController');
+    Route::apiResource('proyectos','ProyectoController');
 });

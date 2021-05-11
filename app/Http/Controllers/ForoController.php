@@ -8,6 +8,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Foro\RegistrarForoRequest;
+use Illuminate\Support\Facades\DB;
 
 class ForoController extends Controller
 {
@@ -26,18 +27,29 @@ class ForoController extends Controller
     }
     public function store(RegistrarForoRequest $request)
     {
-        $usuarioLogueado = JWTAuth::user();
-        $foro = new Foro();
-        $foro->fill($request->all());
-        $foro->slug = "foro-" . $request->no_foro;
-        $foro->prefijo = $foro->getPrefijo($request->anio, $request->periodo);
-        $foro->user()->associate($usuarioLogueado);
-        $foro->save();
-        return response()->json(['message' => 'Foro registrado'], 200);
+        try {
+            DB::beginTransaction();
+            $usuarioLogueado = JWTAuth::user();
+            $foro = new Foro();
+            $foro->fill($request->all());
+            $foro->slug = "foro-" . $request->no_foro;
+            $foro->prefijo = $foro->getPrefijo($request->anio, $request->periodo);
+            $foro->user()->associate($usuarioLogueado);
+            $foro->save();
+            DB::commit();
+            return response()->json(['message' => 'Foro registrado'], 201);
+        } catch (\Exception $e) {
+            DB::rollback();
+            return response()
+                ->json([
+                    'message' => 'Algo mal ha ocurrido'
+                ], 400);
+        }
     }
-    public function show($slug)
+    public function show(Foro $foro)
     {
-        $foro = Foro::select('id', 'slug', 'duracion', 'lim_alumnos', 'num_aulas', 'num_maestros', 'activo')->with(['fechas'])->Buscar($slug)->first();
+        // $foro = Foro::select('id', 'slug', 'duracion', 'lim_alumnos', 'num_aulas', 'num_maestros', 'activo')->with(['fechas'])->Buscar($slug)->first();
+        $foro->select('id', 'slug', 'duracion', 'lim_alumnos', 'num_aulas', 'num_maestros', 'activo')->with(['fechas']);
         if (is_null($foro))
             return response()->json(['message' => 'Foro no encontrado'], 404);
         $posicionET = 0;
@@ -56,17 +68,24 @@ class ForoController extends Controller
     }
     public function update(RegistrarForoRequest $request, Foro $foro)
     {
-        $foro = Foro::Buscar($foro->slug)->first();
-        if (is_null($foro))
-            return response()->json(['message' => 'Foro no encontrado'], 404);
-        $foro->fill($request->all());
-        $foro->prefijo = $foro->getPrefijo($request->anio, $request->periodo);
-        $foro->slug = "foro-" . $request->no_foro;
-        $foro->save();
-        return response()->json(['message' => 'Foro actualizado'], 200);
+        try {
+            DB::beginTransaction();            
+            $foro->fill($request->all());
+            $foro->prefijo = $foro->getPrefijo($request->anio, $request->periodo);
+            $foro->slug = "foro-" . $request->no_foro;
+            $foro->save();
+            DB::commit();
+            return response()->json(['message' => 'Foro actualizado'], 200);
+        } catch (\Exception $exception) {
+            DB::rollback();
+            return response()
+                ->json([
+                    'message' => 'Algo mal ha ocurrido'
+                ], 400);
+        }
     }
     public function destroy(Foro $foro)
-    {        
+    {
         if ($foro->activo)
             return response()->json(['message' => 'No puedes eliminar un foro activo, asegurate que sea el registro deseado'], 400);
         if ($foro->proyectos->count())
@@ -76,6 +95,7 @@ class ForoController extends Controller
     }
     public function foroActual()
     {
+        // politicas
         $usuarioLogueado = JWTAuth::user();
         if (!$usuarioLogueado->validarDatosCompletos())
             return response()->json(['message' => 'Debes completar tus datos para registrar un proyecto'], 400);

@@ -9,24 +9,31 @@ use App\Proyecto;
 use Illuminate\Http\Request;
 use App\Http\Requests\Foro\ConfigForoRequest;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\DB;
 
 class ConfigurarForoController extends Controller
 {
-    public function configurarForo(ConfigForoRequest $request, $slug)
+    // public function configurarForo(ConfigForoRequest $request, $slug)
+    public function configurarForo(ConfigForoRequest $request, Foro $foro)
     {
-        $foro = Foro::Buscar($slug)->first();
-        if (is_null($foro))
-            return response()->json(['message' => 'Foro no encontrado'], 404);
-        // if (!$foro->activo)
-        //     return response()->json(['message' => 'Foro inactivo'], 400);
-        // if (!$foro->inTime())
-        //     return response()->json(['message' => 'Foro fuera de tiempo'], 400);
-        $foro->lim_alumnos = $request->lim_alumnos;
-        $foro->num_aulas = $request->num_aulas;
-        $foro->duracion = $request->duracion;
-        $foro->num_maestros = $request->num_maestros;
-        $foro->save();
-        return response()->json(['message' => 'Config. Registrada'], 200);
+        // politicas
+        try {
+            DB::beginTransaction();
+            // if (!$foro->activo)
+            //     return response()->json(['message' => 'Foro inactivo'], 400);
+            // if (!$foro->inTime())
+            //     return response()->json(['message' => 'Foro fuera de tiempo'], 400);
+            $foro->lim_alumnos = $request->lim_alumnos;
+            $foro->num_aulas = $request->num_aulas;
+            $foro->duracion = $request->duracion;
+            $foro->num_maestros = $request->num_maestros;
+            $foro->save();
+            DB::commit();
+            return response()->json(['message' => 'Config. Registrada'], 200);
+        } catch (\Exception $exception) {
+            DB::rollBack();
+            return response()->json(['message' => 'Algo mal ha ocurrido'], 200);
+        }
     }
     public function agregarMaestro(Request $request, $slug)
     {
@@ -67,9 +74,9 @@ class ConfigurarForoController extends Controller
         // }
         $foro->activo = $request->activo;
         $foro->save();
-        $foroReceso = Horario::first();        
+        $foroReceso = Horario::first();
         if (!is_null($foroReceso)) {
-            $foroReceso = $foroReceso->fechaforo()->first()->foro;            
+            $foroReceso = $foroReceso->fechaforo()->first()->foro;
             if ($foro->no_foro !== $foroReceso->no_foro)
                 Horario::truncate();
         }

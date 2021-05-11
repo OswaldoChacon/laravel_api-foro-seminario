@@ -28,42 +28,25 @@ class RegistrarForoRequest extends FormRequest
      */
     public function rules()
     {
-        if ($this->getMethod() == 'POST') {
-            return [
-                'no_foro' => 'required|numeric|unique:foros,no_foro',
-                'nombre' => 'required',
-                'periodo' => [
-                    'required', 'unique:foros,periodo,' . $this->id . ',id,anio,' . $this->input('anio'),
-                    // new ValidarPeriodo($this->input('anio'))
-                ],
-                'anio' => [
-                    'required', 'integer',
-                    // 'min:' . date('Y'),
-                    'max:' . (date('Y') + 2), 'unique:foros,anio,' . $this->id . ',id,periodo,' . $this->input('periodo')
-                ],
-                'fecha_limite' => ['date', 
+        return [
+            'no_foro' => 'required', 'numeric', Rule::unique('foros')->ignore($this->foro),
+            'nombre' => 'required',
+            'periodo' => [
+                'required',
+                Rule::unique('foros')->ignore($this->foro)->where('anio', $this->anio)
+                // new ValidarPeriodo($this->input('anio'))
+            ],
+            'anio' => [
+                'required', 'integer',
+                // 'min:' . date('Y'),
+                'max:' . (date('Y') + 2),
+                Rule::unique('foros')->ignore($this->foro)->where('periodo', $this->periodo)
+            ],
+            'fecha_limite' => [
+                'date',
                 // 'after_or_equal:' . Carbon::now()->toDateString(), 
                 // new ValidarFecha($this->input('periodo'), $this->input('anio'))
-                ]
-            ];
-        } else if ($this->getMethod() == 'PUT') {
-            return [
-                'no_foro' => 'required|numeric|unique:foros,no_foro,' . $this->foro->id,
-                'nombre' => 'required',
-                'periodo' => ['required', 'unique:foros,periodo,' . $this->foro->id . ',id,anio,' . $this->input('anio'),
-                    // new ValidarPeriodo($this->input('anio'))
-                ],
-                'anio' => [
-                    'required', 'integer',
-                    // 'min:' . date('Y'), 
-                    'max:' . (date('Y') + 2), 'unique:foros,anio,' . $this->foro->id . ',id,periodo,' . $this->input('periodo')
-                ],
-                'fecha_limite' => ['date', 
-                // 'after_or_equal:' . Carbon::now()->toDateString(), 
-                // new ValidarFecha($this->input('periodo'), $this->input('anio'))
-                ]
-
-            ];
-        }
+            ]
+        ];
     }
 }

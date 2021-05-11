@@ -12,8 +12,13 @@ Route::group(['middleware' => ['jwtAuth:Alumno']], function () {
         Route::get('docentes', 'UsuarioController@docentes');
     });
 
-    Route::post('registrar_proyecto', 'ProyectoController@registrarProyecto');
-    Route::put('actualizar_proyecto/{proyecto}', 'ProyectoController@actualizarProyecto');
+    // Route::post('registrar_proyecto', 'ProyectoController@registrarProyecto');
+    // Route::put('actualizar_proyecto/{proyecto}', 'ProyectoController@actualizarProyecto');
+    
+
+
+
+
     Route::get('proyecto_actual', 'ProyectoController@proyectoActual');
     
     Route::put('enviar_solicitud/{proyecto}', 'AlumnoController@enviarSolicitud');
