@@ -4,8 +4,9 @@ namespace App\Http\Requests\Solicitud;
 
 use App\TipoDeSolicitud;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
-class RegistrarSolicitudRequest extends FormRequest
+class TipoDeSolicitudRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -24,14 +25,9 @@ class RegistrarSolicitudRequest extends FormRequest
      */
     public function rules()
     {
-        if ($this->getMethod() == 'POST') {
-            return [
-                'nombre_' => 'required|unique:tipos_de_solicitud,nombre_'
-            ];
-        } elseif ($this->getMethod() == 'PUT') {            
-            return [
-                'nombre_' => 'required|unique:tipos_de_solicitud,nombre_,'.$this->solicitude->id
-            ];
-        }
+        return [
+            'nombre' => ['required', Rule::unique('tipos_de_solicitud')->ignore($this->solicitud)],
+            'descripcion' => ['required', Rule::unique('tipos_de_solicitud')->ignore($this->solicitud)]
+        ];
     }
 }

@@ -18,7 +18,7 @@ class RolController extends Controller
     public function store(RolRequest $request, Rol $rol)
     {
         $rol->fill($request->all())->save();
-        return response()->json(['message' => 'Rol agregado'], 200);
+        return response()->json(['message' => 'Rol agregado'], 201);
     }
 
     public function show(Rol $rol)

@@ -15,17 +15,16 @@ class TipoDeSolicitud extends Model
         'id'
     ];
     protected $fillable = [
-        'nombre_'
+        'nombre', 'descripcion'
     ];
 
     public function getRouteKeyName()
     {
-        return 'nombre_';
+        return 'nombre';
     }
     public function notificaciones()
     {
         // return  $this->HasMany(Notificacion::class,'tipo_solicitud');
         return  $this->HasMany(Notificacion::class);
     }
-    
 }
