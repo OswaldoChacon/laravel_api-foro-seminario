@@ -6,7 +6,7 @@ use App\LineaDeInvestigacion;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
-class RegistrarLineaRequest extends FormRequest
+class LineaDeInvestigacionRequest extends FormRequest
 {
 
     /**

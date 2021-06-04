@@ -3,8 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-
-use App\Http\Requests\Linea\RegistrarLineaRequest;
+use App\Http\Requests\Linea\LineaDeInvestigacionRequest;
 use App\LineaDeInvestigacion;
 
 class LineaController extends Controller
@@ -27,13 +26,13 @@ class LineaController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(RegistrarLineaRequest $request)
+    public function store(LineaDeInvestigacionRequest $request)
     {
         //
         $linea = new LineaDeInvestigacion();
         $linea->fill($request->all());
         $linea->save();
-        return response()->json(['message' => 'Linea registrada'], 200);
+        return response()->json(['message' => 'Registro creado'], 201);
     }
 
     /**
@@ -42,9 +41,9 @@ class LineaController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show(LineaDeInvestigacion $linea)
     {
-        //
+        return response()->json($linea, 200);
     }
 
     /**
@@ -54,15 +53,10 @@ class LineaController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(RegistrarLineaRequest $request, LineaDeInvestigacion $linea)
+    public function update(LineaDeInvestigacionRequest $request, LineaDeInvestigacion $linea)
     {
-        //
-        $linea = LineaDeInvestigacion::Buscar($linea->clave)->first();
-        if(is_null($linea))
-            return response()->json(['message'=>'Linea de inv. no encontrada'], 404);
-        $linea->fill($request->all());
-        $linea->save();
-        return response()->json(['message' => 'Linea actualizada'], 200);
+        $linea->update($request->all());
+        return response()->json(['message' => 'Registro actualizado'], 200);
     }
 
     /**
@@ -72,10 +66,10 @@ class LineaController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function destroy(LineaDeInvestigacion $linea)
-    {        
+    {
         if ($linea->proyectos->count())
             return response()->json(['message' => 'No se puede eliminar el registro'], 400);
         $linea->delete();
-        return response()->json(['message' => 'Linea eliminada'], 200);
+        return response()->json(['message' => 'Registro eliminado'], 200);
     }
 }

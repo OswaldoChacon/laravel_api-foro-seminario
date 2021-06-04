@@ -14,11 +14,11 @@ use Illuminate\Http\Request;
 use App\LineaDeInvestigacion;
 use App\Http\Controllers\Controller;
 use Illuminate\Database\Eloquent\Builder;
-use App\Http\Requests\Proyecto\RegistrarProyectoRequest;
+use App\Http\Requests\ProyectoRequest;
 
 class ProyectoController extends Controller
 {
-    public function registrarProyecto(RegistrarProyectoRequest $request)
+    public function registrarProyecto(ProyectoRequest $request)
     {
         $usuarioLogueado = JWTAuth::user();
         if (!$usuarioLogueado->validarDatosCompletos())
@@ -55,7 +55,8 @@ class ProyectoController extends Controller
         $notificacion->save();
         return response()->json(['mensaje' => 'Proyecto registrado'], 200);
     }
-    public function actualizarProyecto(RegistrarProyectoRequest $request, Proyecto $proyecto)
+
+    public function actualizarProyecto(ProyectoRequest $request, Proyecto $proyecto)
     {
         $usuarioLogueado = JWTAuth::user();
         $proyecto = Proyecto::Buscar($proyecto->folio)->firstOrFail();
@@ -90,9 +91,12 @@ class ProyectoController extends Controller
         }
         return response()->json(['message' => 'Datos del proyecto actualizado'], 200);
     }
+
     public function eliminarProyecto(Proyecto $proyecto)
     {
+        return response()->json($proyecto, 200);
     }
+
     public function proyectoParticipa(Request $request, $folio)
     {
         $proyecto = Proyecto::Where('folio', $folio)->first();
