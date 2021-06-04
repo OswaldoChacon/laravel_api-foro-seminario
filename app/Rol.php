@@ -10,7 +10,7 @@ class Rol extends Model
     protected $table = 'roles';
     public $timestamps = false;
     protected $fillable = [
-        'nombre_'
+        'nombre','descripcion'
     ];
     protected $append = ['is'];
     protected $hidden = [
@@ -19,7 +19,7 @@ class Rol extends Model
 
     public function getRouteKeyName()
     {
-        return 'nombre_';
+        return 'nombre';
     }
     public function users()
     {

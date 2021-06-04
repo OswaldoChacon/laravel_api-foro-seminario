@@ -4,8 +4,9 @@ namespace App\Http\Requests\Rol;
 
 use App\Rol;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
-class RegistrarRolRequest extends FormRequest
+class RolRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -23,15 +24,10 @@ class RegistrarRolRequest extends FormRequest
      * @return array
      */
     public function rules()
-    {        
-        if ($this->getMethod() == 'POST') {
-            return [
-                'nombre_' => 'required|unique:roles,nombre_'
-            ];
-        } elseif ($this->getMethod() == 'PUT') {                        
-            return [                
-                'nombre_' => 'required|unique:roles,nombre_,'.$this->role->id
-            ];
-        }
+    {
+        return [
+            'nombre' => ['required', Rule::unique('roles')->ignore($this->rol)],
+            'descripcion' => ['required', Rule::unique('roles')->ignore($this->rol)]
+        ];        
     }
 }

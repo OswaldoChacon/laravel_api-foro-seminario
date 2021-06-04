@@ -50,6 +50,7 @@ class ProyectoController extends Controller
             $solicitud = TipoDeSolicitud::where('nombre_', 'Registro de proyecto')->first();
             $total = Notificacion::all()->unique('folio')->count();
             $folio = 'RS-' . ($total + 1);
+            // Notificaciones
             $notificacion = new Notificacion();
             $notificacion->folio = $folio;
             $notificacion->emisor_id = $usuarioLogueado->id;

@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Rol\RegistrarRolRequest;
+use App\Http\Requests\Rol\RolRequest;
 use Illuminate\Http\Request;
 use App\Rol;
 
@@ -12,31 +12,30 @@ class RolController extends Controller
     //
     public function index()
     {
-        $Rol = Rol::all();        
+        $Rol = Rol::all();
         return response()->json($Rol, 200);
     }
-    public function store(RegistrarRolRequest $request)
-    {        
-        $rol = new Rol();
-        $rol->fill($request->all());
-        $rol->save();
+    public function store(RolRequest $request, Rol $rol)
+    {
+        $rol->fill($request->all())->save();
         return response()->json(['message' => 'Rol agregado'], 200);
     }
-    public function show()
+
+    public function show(Rol $rol)
     {
+        return response()->json($rol, 200);
     }
-    public function update(RegistrarRolRequest $request, Rol $role)
+
+    public function update(RolRequest $request, Rol $rol)
     {
-        $rol = Rol::where('nombre_', $role->nombre_)->first();                
-        $rol->nombre_ = $request->nombre_;
-        $rol->save();
+        $rol->update($request->all());
         return response()->json(['message' => 'Rol actualizado'], 200);
     }
-    public function destroy(Rol $role)
-    {
-        if($role->users()->count())
-            return response()->json(['message' => 'No se puede eliminar el registro'], 400);
-        $role->delete();
+
+    public function destroy(Rol $rol)
+    {        
+        // $this->authorize('delete', $rol);
+        $rol->delete();
         return response()->json(['message' => 'Rol eliminado'], 200);
     }
 }
