@@ -25,12 +25,11 @@ class ForoController extends Controller
         }
         return response()->json($foros, 200);
     }
-    public function store(RegistrarForoRequest $request)
+    public function store(RegistrarForoRequest $request, Foro $foro)
     {
         try {
             DB::beginTransaction();
             $usuarioLogueado = JWTAuth::user();
-            $foro = new Foro();
             $foro->fill($request->all());
             $foro->slug = "foro-" . $request->no_foro;
             $foro->prefijo = $foro->getPrefijo($request->anio, $request->periodo);
@@ -48,10 +47,7 @@ class ForoController extends Controller
     }
     public function show(Foro $foro)
     {
-        // $foro = Foro::select('id', 'slug', 'duracion', 'lim_alumnos', 'num_aulas', 'num_maestros', 'activo')->with(['fechas'])->Buscar($slug)->first();
         $foro->select('id', 'slug', 'duracion', 'lim_alumnos', 'num_aulas', 'num_maestros', 'activo')->with(['fechas']);
-        if (is_null($foro))
-            return response()->json(['message' => 'Foro no encontrado'], 404);
         $posicionET = 0;
         foreach ($foro->fechas as $fecha) {
             $recesos = $fecha->recesos()->select('posicion')->get()->pluck('posicion')->toArray();
@@ -69,7 +65,7 @@ class ForoController extends Controller
     public function update(RegistrarForoRequest $request, Foro $foro)
     {
         try {
-            DB::beginTransaction();            
+            DB::beginTransaction();
             $foro->fill($request->all());
             $foro->prefijo = $foro->getPrefijo($request->anio, $request->periodo);
             $foro->slug = "foro-" . $request->no_foro;
@@ -86,10 +82,8 @@ class ForoController extends Controller
     }
     public function destroy(Foro $foro)
     {
-        if ($foro->activo)
-            return response()->json(['message' => 'No puedes eliminar un foro activo, asegurate que sea el registro deseado'], 400);
-        if ($foro->proyectos->count())
-            return response()->json(['message' => 'No se puede eliminar el registro'], 400);
+        // Politica        
+        $this->authorize('delete', $foro);
         $foro->delete();
         return response()->json(['message' => 'Foro eliminado'], 200);
     }

@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Linea\LineaDeInvestigacionRequest;
 use App\LineaDeInvestigacion;
 
-class LineaController extends Controller
+class LineaDeInvestigacionController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -26,12 +26,10 @@ class LineaController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(LineaDeInvestigacionRequest $request)
+    public function store(LineaDeInvestigacionRequest $request, LineaDeInvestigacion $linea)
     {
-        //
-        $linea = new LineaDeInvestigacion();
-        $linea->fill($request->all());
-        $linea->save();
+        //        
+        $linea->fill($request->all())->save();        
         return response()->json(['message' => 'Registro creado'], 201);
     }
 
@@ -67,6 +65,7 @@ class LineaController extends Controller
      */
     public function destroy(LineaDeInvestigacion $linea)
     {
+        // Politica
         if ($linea->proyectos->count())
             return response()->json(['message' => 'No se puede eliminar el registro'], 400);
         $linea->delete();

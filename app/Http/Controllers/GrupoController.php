@@ -42,9 +42,9 @@ class GrupoController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show(Grupo $grupo)
     {
-        //
+        return response()->json($grupo, 200);
     }
 
     /**

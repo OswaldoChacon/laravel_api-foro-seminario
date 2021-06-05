@@ -27,11 +27,10 @@ class TipoProyectoController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(RegistrarTiposRequest $request)
-    {
-        $tipoDeProyecto = new TipoDeProyecto();
-        $tipoDeProyecto->fill($request->all())->save();
-        return response()->json(['message' => 'Registro agregado'], 200);
+    public function store(RegistrarTiposRequest $request, TipoDeProyecto $tipoProyecto)
+    {        
+        $tipoProyecto->fill($request->all())->save();
+        return response()->json(['message' => 'Registro creado'], 201);
     }
 
     /**
@@ -40,9 +39,9 @@ class TipoProyectoController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show(TipoDeProyecto $tipoProyecto)
     {
-        //
+        return response()->json($tipoProyecto, 200);
     }
 
     /**
@@ -52,13 +51,10 @@ class TipoProyectoController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(RegistrarTiposRequest $request, TipoDeProyecto $tiposProyecto)
+    public function update(RegistrarTiposRequest $request, TipoDeProyecto $tipoProyecto)
     {
-        $tipoDeProyecto = TipoDeProyecto::where('clave', $tiposProyecto->clave)->first();
-        if(is_null($tipoDeProyecto))
-            return response()->json(['message' => 'Tipo de proyecto no encontrado'], 404);
-        $tipoDeProyecto->fill($request->all())->save();
-        return response()->json(['message' => 'Registro actualizado'], 200);     
+        $tipoProyecto->update($request->all());
+        return response()->json(['message' => 'Registro actualizado'], 200);
     }
 
     /**
@@ -67,11 +63,11 @@ class TipoProyectoController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy(TipoDeProyecto $tiposProyecto)
-    {        
-        if ($tiposProyecto->proyectos->count())
+    public function destroy(TipoDeProyecto $tipoProyecto)
+    {
+        if ($tipoProyecto->proyectos->count())
             return response()->json(['message' => 'No se puede eliminar el registro'], 400);
-        $tiposProyecto->delete();
-        return response()->json(['message' => 'Registro eliminado'], 200);     
+        $tipoProyecto->delete();
+        return response()->json(['message' => 'Registro eliminado'], 200);
     }
 }

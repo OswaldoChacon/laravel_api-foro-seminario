@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Route;
 Route::group(['middleware' => ['jwtAuth:Alumno']], function () {
 
     Route::group(['prefix' => 'alumno'], function () {
-        Route::get('lineas', 'LineaController@index');
+        Route::get('lineas', 'LineaDeInvestigacionController@index');
         Route::get('tiposProyecto', 'TipoProyectoController@index');
         Route::get('docentes', 'UsuarioController@docentes');
     });
