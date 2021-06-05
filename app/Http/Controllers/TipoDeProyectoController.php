@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 
 
-use App\Http\Requests\Tipos\TipoDeProyectoRequest;
+use App\Http\Requests\TipoDeProyectoRequest;
 use App\TipoDeProyecto;
 
 class TipoDeProyectoController extends Controller
@@ -27,9 +27,10 @@ class TipoDeProyectoController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(TipoDeProyectoRequest $request, TipoDeProyecto $tipoProyecto)
-    {        
-        $tipoProyecto->fill($request->all())->save();
+    public function store(TipoDeProyectoRequest $request, TipoDeProyecto $tipoDeProyecto)
+    {
+        $this->authorize('create', TipoDeProyecto::class);
+        $tipoDeProyecto->fill($request->all())->save();
         return response()->json(['message' => 'Registro creado'], 201);
     }
 
@@ -39,9 +40,9 @@ class TipoDeProyectoController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show(TipoDeProyecto $tipoProyecto)
+    public function show(TipoDeProyecto $tipoDeProyecto)
     {
-        return response()->json($tipoProyecto, 200);
+        return response()->json($tipoDeProyecto, 200);
     }
 
     /**
@@ -51,9 +52,9 @@ class TipoDeProyectoController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(TipoDeProyectoRequest $request, TipoDeProyecto $tipoProyecto)
+    public function update(TipoDeProyectoRequest $request, TipoDeProyecto $tipoDeProyecto)
     {
-        $tipoProyecto->update($request->all());
+        $tipoDeProyecto->update($request->all());
         return response()->json(['message' => 'Registro actualizado'], 200);
     }
 
@@ -63,11 +64,10 @@ class TipoDeProyectoController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy(TipoDeProyecto $tipoProyecto)
+    public function destroy(TipoDeProyecto $tipoDeProyecto)
     {
-        if ($tipoProyecto->proyectos->count())
-            return response()->json(['message' => 'No se puede eliminar el registro'], 400);
-        $tipoProyecto->delete();
+        // $this->authorize('delete',$tipoDeProyecto);
+        $tipoDeProyecto->delete();
         return response()->json(['message' => 'Registro eliminado'], 200);
     }
 }

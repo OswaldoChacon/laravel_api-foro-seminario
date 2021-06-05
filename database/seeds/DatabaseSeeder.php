@@ -13,9 +13,9 @@ class DatabaseSeeder extends Seeder
     {
         $this->call(UserSeeder::class);
         $this->call(ForoSeeder::class);
-        $this->call(RolesSeeder::class);
-        $this->call(TiposProyectosSeeder::class);
-        $this->call(TiposSolicitudSeeder::class);
+        $this->call(RolSeeder::class);
+        $this->call(TipoDeProyectoSeeder::class);
+        $this->call(TipoDeSolicitudSeeder::class);
         $this->call(LineaInvestigacionSeeder::class);
 
         factory(App\User::class, 48)->create();

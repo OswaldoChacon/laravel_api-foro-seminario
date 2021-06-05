@@ -1,8 +1,7 @@
 <?php
 
-namespace App\Http\Requests\Tipos;
+namespace App\Http\Requests;
 
-use App\TipoDeProyecto;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -26,8 +25,8 @@ class TipoDeProyectoRequest extends FormRequest
     public function rules()
     {
         return [
-            'clave' => ['required', Rule::unique('tipos_de_proyecto')->ignore($this->tiposProyecto)],
-            'nombre' => ['required', Rule::unique('tipos_de_proyecto')->ignore($this->tiposProyecto)]
+            'clave' => ['required', Rule::unique('tipos_de_proyecto')->ignore($this->tipoDeProyecto)],
+            'nombre' => ['required', Rule::unique('tipos_de_proyecto')->ignore($this->tipoDeProyecto)]
         ];
     }
 }

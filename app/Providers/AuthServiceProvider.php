@@ -3,10 +3,13 @@
 namespace App\Providers;
 
 use App\Policies\RolPolicy;
+use App\Policies\TipoDeProyectoPolicy;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 use Illuminate\Support\Facades\Gate;
 use App\User;
 use App\Policies\UserPolicy;
+use App\TipoDeProyecto;
+
 class AuthServiceProvider extends ServiceProvider
 {
     /**
@@ -17,7 +20,8 @@ class AuthServiceProvider extends ServiceProvider
     protected $policies = [
         // 'App\Model' => 'App\Policies\ModelPolicy',
         User::class => UserPolicy::class,
-        Rol::class=>RolPolicy::class
+        Rol::class => RolPolicy::class,
+        TipoDeProyecto::class => TipoDeProyectoPolicy::class
     ];
 
     /**

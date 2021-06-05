@@ -3,8 +3,9 @@
 use Illuminate\Database\Seeder;
 use App\User;
 use App\Rol;
+use Illuminate\Support\Facades\DB;
 
-class RolesSeeder extends Seeder
+class RolSeeder extends Seeder
 {
     /**
      * Run the database seeds.
@@ -16,13 +17,16 @@ class RolesSeeder extends Seeder
         //
         $roles = [
             [
-                'nombre_' => 'Administrador'
+                'nombre' => 'Administrador',
+                'descripcion' => 'Administrador'
             ],
             [
-                'nombre_' => 'Docente'
+                'nombre' => 'Docente',
+                'descripcion' => 'Docente'
             ],
             [
-                'nombre_' => 'Alumno'
+                'nombre' => 'Alumno',
+                'descripcion' => 'Alumno'
             ]
         ];
         DB::table('roles')->insert($roles);

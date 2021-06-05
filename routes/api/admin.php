@@ -5,14 +5,14 @@ use Illuminate\Support\Facades\Route;
 
 
 
-// Route::group(['middleware' => ['jwtAuth:Administrador']], function () {
+Route::group(['middleware' => ['jwtAuth:Administrador']], function () {
     Route::post('agregar_rol', 'UsuarioController@agregarRol');
     Route::delete('eliminar_rol/{usuario}', 'UsuarioController@eliminarRol');
 
     Route::apiResource('roles', 'RolController')->parameters(['roles' => 'rol']);
     Route::apiResource('solicitudes', 'TipoDeSolicitudController')->parameters(['solicitudes' => 'solicitud']);
     Route::apiResource('lineas', 'LineaDeInvestigacionController');
-    Route::apiResource('tiposProyecto', 'TipoDeProyectoController')->parameters(['tiposProyecto'=>'tipoProyecto']);
+    Route::apiResource('tiposDeProyecto', 'TipoDeProyectoController')->parameters(['tiposDeProyecto' => 'tipoDeProyecto']);
 
     Route::apiResource('foros', 'ForoController');
     Route::put('configurar_foro/{foro}', 'ConfigurarForoController@configurarForo');
@@ -38,4 +38,4 @@ use Illuminate\Support\Facades\Route;
 
     Route::post('generar_horario', 'GenerarHorarioController@generarHorario');
     Route::get('proyectos_maestros', 'GenerarHorarioController@proyectosMaestros');
-// });
+});
