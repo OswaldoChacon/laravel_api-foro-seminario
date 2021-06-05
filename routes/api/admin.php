@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Route;
     Route::apiResource('roles', 'RolController')->parameters(['roles' => 'rol']);
     Route::apiResource('solicitudes', 'TipoDeSolicitudController')->parameters(['solicitudes' => 'solicitud']);
     Route::apiResource('lineas', 'LineaDeInvestigacionController');
-    Route::apiResource('tiposProyecto', 'TipoProyectoController')->parameters(['tiposProyecto'=>'tipoProyecto']);
+    Route::apiResource('tiposProyecto', 'TipoDeProyectoController')->parameters(['tiposProyecto'=>'tipoProyecto']);
 
     Route::apiResource('foros', 'ForoController');
     Route::put('configurar_foro/{foro}', 'ConfigurarForoController@configurarForo');

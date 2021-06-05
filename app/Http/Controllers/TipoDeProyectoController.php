@@ -5,10 +5,10 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 
 
-use App\Http\Requests\Tipos\RegistrarTiposRequest;
+use App\Http\Requests\Tipos\TipoDeProyectoRequest;
 use App\TipoDeProyecto;
 
-class TipoProyectoController extends Controller
+class TipoDeProyectoController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -27,7 +27,7 @@ class TipoProyectoController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(RegistrarTiposRequest $request, TipoDeProyecto $tipoProyecto)
+    public function store(TipoDeProyectoRequest $request, TipoDeProyecto $tipoProyecto)
     {        
         $tipoProyecto->fill($request->all())->save();
         return response()->json(['message' => 'Registro creado'], 201);
@@ -51,7 +51,7 @@ class TipoProyectoController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(RegistrarTiposRequest $request, TipoDeProyecto $tipoProyecto)
+    public function update(TipoDeProyectoRequest $request, TipoDeProyecto $tipoProyecto)
     {
         $tipoProyecto->update($request->all());
         return response()->json(['message' => 'Registro actualizado'], 200);

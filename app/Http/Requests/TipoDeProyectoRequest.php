@@ -6,7 +6,7 @@ use App\TipoDeProyecto;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
-class RegistrarTiposRequest extends FormRequest
+class TipoDeProyectoRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
