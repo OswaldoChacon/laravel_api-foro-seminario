@@ -20,7 +20,8 @@ Route::group(['middleware' => ['jwtAuth:Administrador']], function () {
     Route::apiResource('lineas-de-investigacion', 'LineaDeInvestigacionController')->parameters(['lineas-de-investigacion'=>'lineaDeInvestigacion']);
     Route::apiResource('tipos-de-proyectos', 'TipoDeProyectoController')->parameters(['tipos-de-proyectos' => 'tipoDeProyecto']);
     Route::apiResource('foros', 'ForoController');
-    Route::apiResource('foros/{foro}/fecha-foro', 'FechaForoController')->parameters(['fecha-foro'=>'fechaForo']);
+    Route::apiResource('foros.fechas-foro', 'FechaForoController')->parameters(['fecha-foro'=>'fechaForo']);
+    Route::apiResource('foros.fechas-foro.recesos', 'FechaForoController');
 
     Route::put('configurar_foro/{foro}', 'ConfigurarForoController@configurarForo');
     Route::put('activar_foro/{foro}', 'ConfigurarForoController@activarForo');

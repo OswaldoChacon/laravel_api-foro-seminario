@@ -8,7 +8,7 @@ use App\Horario;
 use App\FechaForo;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Fecha\BreakRequest;
+use App\Http\Requests\Fecha\RecesoRequest;
 use App\Http\Requests\Fecha\FechaForoRequest;
 
 
@@ -32,7 +32,7 @@ class FechaForoController extends Controller
      */
     public function store(FechaForoRequest $request, Foro $foro, FechaForo $fechaForo)
     {
-        $this->authorize('create', [$fechaForo, $foro]);
+        $this->authorize('create', [$fechaForo, $foro]);        
         $fechaForo->fill($request->all());
         $fechaForo->foro()->associate($foro)->save();
         Horario::truncate();
@@ -79,42 +79,42 @@ class FechaForoController extends Controller
         return response()->json(['Success' => 'Fecha eliminada']);
     }
 
-    public function agregarBreak(BreakRequest $request, $fecha)
+    public function agregarBreak(RecesoRequest $request, $fecha)
     {
         // politicas
-        $fecha = FechaForo::Where('fecha', $fecha)->first();
-        if (is_null($fecha))
-            return response()->json(['message' => 'Fecha no encontrada'], 404);
-        $foro = $fecha->foro;
-        if (is_null($foro))
-            return response()->json(['message' => 'Foro no encontrado'], 404);
-        if (!$foro->activo)
-            return response()->json(['message' => 'Foro inactivo'], 400);
-        if (!$foro->inTime())
-            return response()->json(['message' => 'Foro fuera de tiempo'], 400);
-        $receso = new Receso();
-        $receso->fill($request->all());
-        $receso->fecha_foro()->associate($fecha);
-        DB::table('horarios')->where('posicion', $request->posicion)->delete();
-        $receso->save();
-        return response()->json(['mensaje' => 'Receso agregado'], 200);
+        // $fecha = FechaForo::Where('fecha', $fecha)->first();
+        // if (is_null($fecha))
+        //     return response()->json(['message' => 'Fecha no encontrada'], 404);
+        // $foro = $fecha->foro;
+        // if (is_null($foro))
+        //     return response()->json(['message' => 'Foro no encontrado'], 404);
+        // if (!$foro->activo)
+        //     return response()->json(['message' => 'Foro inactivo'], 400);
+        // if (!$foro->inTime())
+        //     return response()->json(['message' => 'Foro fuera de tiempo'], 400);
+        // $receso = new Receso();
+        // $receso->fill($request->all());
+        // $receso->fecha_foro()->associate($fecha);
+        // DB::table('horarios')->where('posicion', $request->posicion)->delete();
+        // $receso->save();
+        // return response()->json(['mensaje' => 'Receso agregado'], 200);
     }
-    public function eliminarBreak(BreakRequest $request, $fecha)
+    public function eliminarBreak(RecesoRequest $request, $fecha)
     {
         // politicas
-        $fecha = FechaForo::Where('fecha', $fecha)->first();
-        if (is_null($fecha))
-            return response()->json(['message' => 'Fecha no encontrada'], 404);
-        $foro = $fecha->foro()->first();
-        if (is_null($foro))
-            return response()->json(['message' => 'Foro no encontrado'], 404);
-        if (!$foro->activo)
-            return response()->json(['message' => 'Foro inactivo'], 400);
-        $receso = Receso::Where([
-            ['fecha_foro_id', $fecha->id],
-            ['posicion', $request->posicion]
-        ])->firstOrFail();
-        $receso->delete();
-        return response()->json(['mensaje' => 'Break eliminado'], 200);
+        // $fecha = FechaForo::Where('fecha', $fecha)->first();
+        // if (is_null($fecha))
+        //     return response()->json(['message' => 'Fecha no encontrada'], 404);
+        // $foro = $fecha->foro()->first();
+        // if (is_null($foro))
+        //     return response()->json(['message' => 'Foro no encontrado'], 404);
+        // if (!$foro->activo)
+        //     return response()->json(['message' => 'Foro inactivo'], 400);
+        // $receso = Receso::Where([
+        //     ['fecha_foro_id', $fecha->id],
+        //     ['posicion', $request->posicion]
+        // ])->firstOrFail();
+        // $receso->delete();
+        // return response()->json(['mensaje' => 'Break eliminado'], 200);
     }
 }

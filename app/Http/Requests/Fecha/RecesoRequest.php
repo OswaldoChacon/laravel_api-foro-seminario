@@ -4,7 +4,7 @@ namespace App\Http\Requests\Fecha;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class BreakRequest extends FormRequest
+class RecesoRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
