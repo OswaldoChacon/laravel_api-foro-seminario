@@ -66,9 +66,10 @@ class ForoPolicy
     public function delete(User $user, Foro $foro)
     {
         if ($foro->activo)
-            return response()->json(['message' => 'No puedes eliminar un foro activo, asegurate que sea el registro deseado'], 400);
-        if ($foro->proyectos->count())
-            return response()->json(['message' => 'No se puede eliminar el registro'], 400);
+            return false;
+        else if ($foro->proyectos->count())
+            return false;
+        return true;
     }
 
     /**

@@ -7,7 +7,7 @@ use App\Foro;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Foro\RegistrarForoRequest;
+use App\Http\Requests\Foro\ForoRequest;
 use Illuminate\Support\Facades\DB;
 
 class ForoController extends Controller
@@ -25,7 +25,7 @@ class ForoController extends Controller
         }
         return response()->json($foros, 200);
     }
-    public function store(RegistrarForoRequest $request, Foro $foro)
+    public function store(ForoRequest $request, Foro $foro)
     {
         try {
             DB::beginTransaction();
@@ -62,7 +62,7 @@ class ForoController extends Controller
         $foro->append('docentes');
         return response()->json($foro, 200);
     }
-    public function update(RegistrarForoRequest $request, Foro $foro)
+    public function update(ForoRequest $request, Foro $foro)
     {
         try {
             DB::beginTransaction();

@@ -9,7 +9,7 @@ use Carbon\Carbon;
 use Illuminate\Validation\Rule;
 use Illuminate\Foundation\Http\FormRequest;
 
-class RegistrarForoRequest extends FormRequest
+class ForoRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.

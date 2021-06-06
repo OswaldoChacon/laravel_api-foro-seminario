@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\TipoDeSolicitudController;
+use App\TipoDeSolicitud;
 use Illuminate\Support\Facades\Route;
 
 
@@ -10,11 +12,11 @@ Route::group(['middleware' => ['jwtAuth:Administrador']], function () {
     Route::delete('eliminar_rol/{usuario}', 'UsuarioController@eliminarRol');
 
     Route::apiResource('roles', 'RolController')->parameters(['roles' => 'rol']);
-    Route::apiResource('tipos-de-solicitudes', 'TipoDeSolicitudController')->parameters(['tipos-de-solicitudes' => 'tipoDeSolicitud']);
-    Route::apiResource('lineas-de-investigacion', 'LineaDeInvestigacionController')->parameters(['lineas-de-investigacion'=>'lineaDeInvestigacion']);
-    Route::apiResource('tipos-de-proyectos', 'TipoDeProyectoController')->parameters(['tipos-de-proyectos' => 'tipoDeProyecto']);
+    Route::apiResource('tipos-de-solicitudes', TipoDeSolicitudController::class)->parameters(['tipos-de-solicitudes' => 'tipoDeSolicitud']);
+    Route::apiResource('lineas-de-investigacion', LineaDeInvestigacionController::class)->parameters(['lineas-de-investigacion'=>'lineaDeInvestigacion']);
+    Route::apiResource('tipos-de-proyectos', TipoDeProyectoController::class)->parameters(['tipos-de-proyectos' => 'tipoDeProyecto']);
+    Route::apiResource('foros', ForoController::class);
 
-    Route::apiResource('foros', 'ForoController');
     Route::put('configurar_foro/{foro}', 'ConfigurarForoController@configurarForo');
     Route::put('activar_foro/{foro}', 'ConfigurarForoController@activarForo');
     Route::post('agregar_maestro/{foro}', 'ConfigurarForoController@agregarMaestro');
