@@ -9,7 +9,7 @@ use App\FechaForo;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Fecha\BreakRequest;
-use App\Http\Requests\Fecha\RegistrarFechaRequest;
+use App\Http\Requests\Fecha\FechaForoRequest;
 
 
 class FechaForoController extends Controller
@@ -30,20 +30,13 @@ class FechaForoController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(RegistrarFechaRequest $request)
+    public function store(FechaForoRequest $request, Foro $foro, FechaForo $fechaForo)
     {
-        // politicas
-        $foro = Foro::Buscar($request->slug)->first();
-        if (!$foro->activo)
-            return response()->json(['message' => 'Foro inactivo'], 400);
-        if (!$foro->inTime())
-            return response()->json(['message' => 'Foro fuera de tiempo'], 400);
-        $fecha = new FechaForo();
-        $fecha->fill($request->all());
-        $fecha->foro()->associate($foro);
-        $fecha->save();
+        $this->authorize('create', [$fechaForo, $foro]);
+        $fechaForo->fill($request->all());
+        $fechaForo->foro()->associate($foro)->save();
         Horario::truncate();
-        return response()->json(['message' => 'Fecha registrada'], 200);
+        return response()->json(['message' => 'Registro creado'], 201);
     }
 
     /**
@@ -52,9 +45,9 @@ class FechaForoController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show(FechaForo $fechaforo)
+    public function show(FechaForo $fechaForo)
     {
-        return response()->json($fechaforo, 200);
+        return response()->json($fechaForo, 200);
     }
 
     /**
@@ -64,22 +57,11 @@ class FechaForoController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(RegistrarFechaRequest $request, FechaForo $fechaforo)
+    public function update(FechaForoRequest $request, Foro $foro, FechaForo $fechaForo)
     {
-        // politicas
-        $fecha = FechaForo::Where('fecha', $fechaforo->fecha)->first();
-        if (is_null($fecha))
-            return response()->json(['message' => 'Fecha no encontrada'], 404);
-        $foro = $fecha->foro;
-        if (is_null($foro))
-            return response()->json(['message' => 'Foro no encontrado'], 404);
-        if (!$foro->activo)
-            return response()->json(['message' => 'Foro inactivo'], 400);
-        if (!$foro->inTime())
-            return response()->json(['message' => 'Foro fuera de tiempo'], 400);
         // checar QUE PASA CON LOS HORARIOS DE LOS DOCENTES
-        $fecha->fill($request->all());
-        $fecha->save();
+        $this->authorize('update', [$fechaForo, $foro]);
+        $fechaForo->update($request->all());
         Horario::truncate();
         return response()->json(['Success' => 'Fecha actualizada'], 200);
     }
@@ -90,10 +72,10 @@ class FechaForoController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy(FechaForo $fechaforo)
+    public function destroy(Foro $foro, FechaForo $fechaForo)
     {
         // politicas
-        $fechaforo->delete();
+        $fechaForo->delete();
         return response()->json(['Success' => 'Fecha eliminada']);
     }
 

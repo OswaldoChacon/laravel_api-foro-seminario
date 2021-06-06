@@ -14,6 +14,10 @@ class Foro extends Model
         'id', 'user_id',
     ];
 
+    protected $casts = [
+        'activo' => 'boolean',
+    ];
+    
     public function getRouteKeyName()
     {
         return 'slug';
@@ -37,7 +41,7 @@ class Foro extends Model
 
     // validaciones
     public function canActivate()
-    {        
+    {
         return true;
         // if ($this->activo || $this->inTime())
         //     return true;
@@ -48,7 +52,7 @@ class Foro extends Model
         $meses = array("ENERO", "FEBRERO", "MARZO", "ABRIL", "MAYO", "JUNIO", "JULIO", "AGOSTO", "SEPTIEMBRE", "OCTUBRE", "NOVIEMBRE", "DICIEMBRE");
         $fechas_foro = explode("-", $this->periodo);
         $mes_actual = date("m");
-        if (date("Y") == $this->anio) {            
+        if (date("Y") == $this->anio) {
             if ((array_search($fechas_foro[0], $meses) + 1) <= $mes_actual && $mes_actual <= array_search($fechas_foro[1], $meses) + 1)
                 return true;
         }
