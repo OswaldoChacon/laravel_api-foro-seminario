@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Requests\Linea;
+namespace App\Http\Requests;
 
 use App\LineaDeInvestigacion;
 use Illuminate\Foundation\Http\FormRequest;

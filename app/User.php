@@ -117,7 +117,7 @@ class User extends Authenticatable implements JWTSubject
     }
     public function hasRole($rol)
     {
-        if ($this->roles()->where('nombre_', $rol)->count() > 0)
+        if ($this->roles()->where('nombre', $rol)->count() > 0)
             return true;
         if ($rol === 'Taller')
             if ($this->foros_users()->Activo(true)->count() > 0)
@@ -161,7 +161,7 @@ class User extends Authenticatable implements JWTSubject
     {
         $roles = Rol::all();
         foreach ($roles as $rol) {
-            $rol->is = $this->hasRole($rol->nombre_);
+            $rol->is = $this->hasRole($rol->nombre);
         }
         return $roles;
     }
@@ -176,7 +176,7 @@ class User extends Authenticatable implements JWTSubject
     {
         $roles = array();
         foreach ($this->roles()->get() as $rol) {
-            array_push($roles, strtolower($rol->nombre_));
+            array_push($roles, strtolower($rol->nombre));
         }
         if ($this->foros_users()->Activo(true)
             // where('activo', true)
@@ -227,7 +227,7 @@ class User extends Authenticatable implements JWTSubject
     public function scopeUsuariosConRol($query, $rol)
     {
         return $query->whereHas('roles', function ($query) use ($rol) {
-            $query->where('nombre_', $rol);
+            $query->where('nombre', $rol);
         });
     }
     public function scopeConDatosCompletos($query)

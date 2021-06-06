@@ -10,9 +10,9 @@ Route::group(['middleware' => ['jwtAuth:Administrador']], function () {
     Route::delete('eliminar_rol/{usuario}', 'UsuarioController@eliminarRol');
 
     Route::apiResource('roles', 'RolController')->parameters(['roles' => 'rol']);
-    Route::apiResource('solicitudes', 'TipoDeSolicitudController')->parameters(['solicitudes' => 'solicitud']);
-    Route::apiResource('lineas', 'LineaDeInvestigacionController');
-    Route::apiResource('tiposDeProyecto', 'TipoDeProyectoController')->parameters(['tiposDeProyecto' => 'tipoDeProyecto']);
+    Route::apiResource('tipos-de-solicitudes', 'TipoDeSolicitudController')->parameters(['tipos-de-solicitudes' => 'tipoDeSolicitud']);
+    Route::apiResource('lineas-de-investigacion', 'LineaDeInvestigacionController')->parameters(['lineas-de-investigacion'=>'lineaDeInvestigacion']);
+    Route::apiResource('tipos-de-proyectos', 'TipoDeProyectoController')->parameters(['tipos-de-proyectos' => 'tipoDeProyecto']);
 
     Route::apiResource('foros', 'ForoController');
     Route::put('configurar_foro/{foro}', 'ConfigurarForoController@configurarForo');

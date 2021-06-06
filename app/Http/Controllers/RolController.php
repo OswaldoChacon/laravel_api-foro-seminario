@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Rol\RolRequest;
+use App\Http\Requests\RolRequest;
 use Illuminate\Http\Request;
 use App\Rol;
 
@@ -34,7 +34,7 @@ class RolController extends Controller
 
     public function destroy(Rol $rol)
     {        
-        // $this->authorize('delete', $rol);
+        $this->authorize('delete', $rol);
         $rol->delete();
         return response()->json(['message' => 'Rol eliminado'], 200);
     }

@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Linea\LineaDeInvestigacionRequest;
+use App\Http\Requests\LineaDeInvestigacionRequest;
 use App\LineaDeInvestigacion;
 
 class LineaDeInvestigacionController extends Controller

@@ -64,11 +64,8 @@ class RolPolicy
      * @return mixed
      */
     public function delete(User $user, Rol $rol)
-    {                
-        return true;
-        // if ($rol->users()->count())
-        //     return false;
-        // return true;        
+    {
+        return $rol->users()->count() ? false : true;
     }
 
     /**
